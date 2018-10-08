@@ -1,7 +1,7 @@
 /**
  * This file contains declares the BitcoinNodeHelper class.
  */
- 
+
 #ifndef BITCOIN_NODE_HELPER_H
 #define BITCOIN_NODE_HELPER_H
 
@@ -17,7 +17,7 @@ namespace ns3 {
 /**
  * Based on packet-sink-helper
  */
- 
+
 class BitcoinNodeHelper
 {
 public:
@@ -26,7 +26,7 @@ public:
    *
    * \param protocol the name of the protocol to use to receive traffic
    *        This string identifies the socket factory type used to create
-   *        sockets for the applications.  A typical value would be 
+   *        sockets for the applications.  A typical value would be
    *        ns3::TcpSocketFactory.
    * \param address the address of the bitcoin node
    * \param peers a reference to a vector containing the Ipv4 addresses of peers of the bitcoin node
@@ -35,20 +35,21 @@ public:
    * \param internetSpeeds a reference to a struct containing the internet speeds of the node
    * \param stats a pointer to struct holding the node statistics
    */
-  BitcoinNodeHelper (std::string protocol, Address address, std::vector<Ipv4Address> &peers, 
+  BitcoinNodeHelper (std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                      std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats);
-  
+                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
+                   int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder);
+
   /**
    * Called by subclasses to set a different factory TypeId
    */
   BitcoinNodeHelper (void);
-  
+
   /**
    * Common Constructor called both from the base class and the subclasses
    * \param protocol the name of the protocol to use to receive traffic
    *        This string identifies the socket factory type used to create
-   *        sockets for the applications.  A typical value would be 
+   *        sockets for the applications.  A typical value would be
    *        ns3::TcpSocketFactory.
    * \param address the address of the bitcoin node
    * \param peers a reference to a vector containing the Ipv4 addresses of peers of the bitcoin node
@@ -57,10 +58,11 @@ public:
    * \param internetSpeeds a reference to a struct containing the internet speeds of the node
    * \param stats a pointer to struct holding the node statistics
    */
-   void commonConstructor(std::string protocol, Address address, std::vector<Ipv4Address> &peers, 
+   void commonConstructor(std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                           std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                          nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats);
-  
+                          nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
+                        int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder);
+
   /**
    * Helper function used to set the underlying application attributes.
    *
@@ -73,7 +75,7 @@ public:
    * Install an ns3::PacketSinkApplication on each node of the input container
    * configured with all the attributes set with SetAttribute.
    *
-   * \param c NodeContainer of the set of nodes on which a PacketSinkApplication 
+   * \param c NodeContainer of the set of nodes on which a PacketSinkApplication
    * will be installed.
    * \returns Container of Ptr to the applications installed.
    */
@@ -98,16 +100,16 @@ public:
   ApplicationContainer Install (std::string nodeName);
 
   void SetPeersAddresses (std::vector<Ipv4Address> &peersAddresses);
-  
+
   void SetPeersDownloadSpeeds (std::map<Ipv4Address, double> &peersDownloadSpeeds);
   void SetPeersUploadSpeeds (std::map<Ipv4Address, double> &peersUploadSpeeds);
-  
+
   void SetNodeInternetSpeeds (nodeInternetSpeeds &internetSpeeds);
 
   void SetNodeStats (nodeStatistics *nodeStats);
+  void SetProperties (uint64_t timeToRun, enum ProtocolType protocol, enum ModeType mode, double overlap, int systemId,
+    std::vector<Ipv4Address> outPeers, int reconciliationMode, int m_reconciliationIntervalSeconds);
 
-  void SetProtocolType (enum ProtocolType protocolType);
-  
 protected:
   /**
    * Install an ns3::PacketSink on the node configured with all the
@@ -117,17 +119,28 @@ protected:
    * \returns Ptr to the application installed.
    */
   virtual Ptr<Application> InstallPriv (Ptr<Node> node);
-  
+
   ObjectFactory                                       m_factory;              //!< Object factory.
-  std::string                                         m_protocol;             //!< The name of the protocol to use to receive traffic
+  std::string                                         m_netProtocol;             //!< The name of the protocol to use to receive traffic
   Address                                             m_address;              //!< The address of the bitcoin node
   std::vector<Ipv4Address>		                      m_peersAddresses;       //!< The addresses of peers
   std::map<Ipv4Address, double>                       m_peersDownloadSpeeds;  //!< The download speeds of the peers
   std::map<Ipv4Address, double>                       m_peersUploadSpeeds;    //!< The upload speeds of the peers
   nodeInternetSpeeds                                  m_internetSpeeds;       //!< The internet speeds of the node
   nodeStatistics                                      *m_nodeStats;           //!< The struct holding the node statistics
-  enum ProtocolType									  m_protocolType;         //!< The protocol that the nodes use to advertise new blocks (DEFAULT: STANDARD)
 
+  std::vector<Ipv4Address> m_outPeers;
+  uint64_t m_timeToRun;
+  int m_systemId;
+  double m_overlap;                                                             //!< The percentage of the filter space shared with a peer
+  enum ProtocolType									          m_protocol;         //!< The protocol that the nodes use to advertise new blocks (DEFAULT: STANDARD)
+  enum ModeType									              m_mode;
+  int m_reconciliationMode;
+  int m_invIntervalSeconds;
+  int m_reconciliationIntervalSeconds;
+  int m_lowfanoutOrderOut;
+  int m_lowfanoutOrderIn;
+  int m_loophandlingOrder;
 };
 
 } // namespace ns3
