@@ -387,11 +387,11 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     if (stats[it].mode == BLACK_HOLE)
       continue;
 
-    std::cout << "\nNode " << stats[it].nodeId << " statistics:\n";
+    // std::cout << "\nNode " << stats[it].nodeId << " statistics:\n";
     // std::cout << "Connections = " << stats[it].connections << "\n";
-    std::cout << "Transactions created = " << stats[it].txCreated << "\n";
+    // std::cout << "Transactions created = " << stats[it].txCreated << "\n";
     // std::cout << "Inv received = " << stats[it].invReceivedMessages << "\n";
-    std::cout << "Tx received = " << stats[it].txReceived << "\n";
+    // std::cout << "Tx received = " << stats[it].txReceived << "\n";
     //
     for (auto el: stats[it].reconcilData) {
       if (el.diffSize < DIFFS_DISTR_SIZE - 1)
