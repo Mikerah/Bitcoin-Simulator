@@ -204,17 +204,6 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
   for(auto peer : m_peersAddresses) {
     m_peerStatistics.insert(std::pair<Ipv4Address, peerStatistics>(peer, peerstats));
   }
-
-
-  if (m_protocolSettings.protocol == PREFERRED_ALL_DESTINATIONS) {
-      for (int i = 0; i < m_peersAddresses.size(); i++) {
-          m_preferredPeers.push_back(m_peersAddresses.at(i));
-      }
-  } else if (m_protocolSettings.protocol == PREFERRED_OUT_DESTINATIONS) {
-      for (int i = 0; i < m_outPeers.size(); i++) {
-          m_preferredPeers.push_back(m_outPeers.at(i));
-      }
-    }
 }
 
 void
@@ -307,8 +296,6 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
 
   m_nodeStats->mode = m_mode;
 
-  AnnounceMode();
-
   if (m_nodeStats->nodeId == 1) {
     LogTime();
   }
@@ -319,7 +306,9 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
   if (m_protocolSettings.reconciliationMode != RECON_OFF) {
     int nextReconciliation = 10;
     Simulator::Schedule (Seconds(nextReconciliation), &BitcoinNode::ReconcileWithPeer, this);
-  }}
+  }
+  AnnounceMode();
+}
 
 
 void BitcoinNode::LogTime() {
@@ -408,7 +397,6 @@ BitcoinNode::ReconcileWithPeer(void) {
       return;
     }
     Simulator::Schedule (Seconds(m_protocolSettings.reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
-    // std::cout << m_nodeStats->nodeId << " requesting reconcil with " << set_size << std::endl;
 }
 
 Ipv4Address
@@ -454,10 +442,8 @@ BitcoinNode::AnnounceMode (void)
     m_peersSockets[*i]->Send(delimiter, 1, 0);
   }
 
-  if (m_mode == BLACK_HOLE)
-    return;
-
-  Simulator::Schedule (Seconds(5), &BitcoinNode::ScheduleNextTransactionEvent, this);
+  if (m_mode == TX_EMITTER)
+    Simulator::Schedule (Seconds(5), &BitcoinNode::ScheduleNextTransactionEvent, this);
 
 }
 
@@ -476,16 +462,13 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
 {
   NS_LOG_FUNCTION (this);
 
+  // Do not emit transactions which will be never reconciled in the network
+  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 3)
+    return;
+
   // On average 7 transactions per second
   int averageDelay = TX_EMITTERS/7;
   auto delay = PoissonNextSend(averageDelay);
-
-  // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + delay + m_protocolSettings.reconciliationIntervalSeconds * 3)
-    return;
-
-  if (m_mode != TX_EMITTER)
-    return;
 
   EventId m_nextTransactionEvent = Simulator::Schedule (Seconds(delay), &BitcoinNode::EmitTransaction, this);
 }
