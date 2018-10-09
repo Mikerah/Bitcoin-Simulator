@@ -37,8 +37,7 @@ public:
    */
   BitcoinNodeHelper (std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                      std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
-                   int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder);
+                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, ProtocolSettings settings);
 
   /**
    * Called by subclasses to set a different factory TypeId
@@ -60,8 +59,7 @@ public:
    */
    void commonConstructor(std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                           std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                          nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
-                        int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder);
+                          nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, ProtocolSettings settings);
 
   /**
    * Helper function used to set the underlying application attributes.
@@ -107,8 +105,8 @@ public:
   void SetNodeInternetSpeeds (nodeInternetSpeeds &internetSpeeds);
 
   void SetNodeStats (nodeStatistics *nodeStats);
-  void SetProperties (uint64_t timeToRun, enum ProtocolType protocol, enum ModeType mode, double overlap, int systemId,
-    std::vector<Ipv4Address> outPeers, int reconciliationMode, int m_reconciliationIntervalSeconds);
+  void SetProperties (uint64_t timeToRun, enum ModeType mode, int systemId,
+    std::vector<Ipv4Address> outPeers);
 
 protected:
   /**
@@ -132,15 +130,9 @@ protected:
   std::vector<Ipv4Address> m_outPeers;
   uint64_t m_timeToRun;
   int m_systemId;
-  double m_overlap;                                                             //!< The percentage of the filter space shared with a peer
-  enum ProtocolType									          m_protocol;         //!< The protocol that the nodes use to advertise new blocks (DEFAULT: STANDARD)
   enum ModeType									              m_mode;
-  int m_reconciliationMode;
-  int m_invIntervalSeconds;
-  int m_reconciliationIntervalSeconds;
-  int m_lowfanoutOrderOut;
-  int m_lowfanoutOrderIn;
-  int m_loophandlingOrder;
+
+  ProtocolSettings m_protocolSettings;
 };
 
 } // namespace ns3

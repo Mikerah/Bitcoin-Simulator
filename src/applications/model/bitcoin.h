@@ -42,7 +42,7 @@ enum ProtocolType
   OUTGOING_FILTERS,
   PREFERRED_OUT_DESTINATIONS,
   PREFERRED_ALL_DESTINATIONS,
-  DANDELION_LIKE,
+  DANDELION_MAPPING,
 };
 
 enum ReconcilStrategy
@@ -118,6 +118,20 @@ typedef struct {
   double downloadSpeed;
   double uploadSpeed;
 } nodeInternetSpeeds;
+
+typedef struct {
+  ProtocolType protocol;
+  int invIntervalSeconds;
+
+  int loopAccomodation;
+  int lowfanoutOrderInPercent;
+  int lowfanoutOrderOut;
+
+
+  int reconciliationMode;
+  int reconciliationIntervalSeconds;
+  double qEstimationMultiplier;
+} ProtocolSettings;
 
 #define FILTER_BASE_NUMBERING 1000
 

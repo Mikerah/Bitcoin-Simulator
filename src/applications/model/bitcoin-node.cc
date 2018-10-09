@@ -34,10 +34,8 @@ int reconcilsToNotCount = 3;
 int RECON_HOP = 999;
 
 
-int EstimateDifference(int setSize1, int setSize2, int protocol) {
-  if (protocol == PREFERRED_OUT_DESTINATIONS)
-    return int(std::abs(setSize1 - setSize2) + 0.2 * std::min(setSize1, setSize2));
-  return int(std::abs(setSize1 - setSize2) + 0.1 * std::min(setSize1, setSize2));
+int EstimateDifference(int setSize1, int setSize2, double multiplier) {
+  return int(std::abs(setSize1 - setSize2) + multiplier * std::min(setSize1, setSize2));
 }
 
 int BitcoinNode::PoissonNextSend(int averageIntervalSeconds) {
@@ -102,8 +100,6 @@ BitcoinNode::BitcoinNode (void) : m_bitcoinPort (8333), m_secondsPerMin(60), m_c
   m_numInvsSent = 0;
   txCreator = false;
   voidReconciliations = 0;
-  m_reconciliationMode = 0;
-
 }
 
 BitcoinNode::~BitcoinNode(void)
@@ -169,34 +165,25 @@ BitcoinNode::SetNodeStats (nodeStatistics *nodeStats)
 };
 
 void
-BitcoinNode::SetProperties (uint64_t timeToRun, enum ProtocolType protocol, enum ModeType mode,
-    double overlap, int systemId, std::vector<Ipv4Address> outPeers, int reconciliationMode, int invIntervalSeconds,
-    int reconciliationIntervalSeconds, int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder)
+BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
+    int systemId, std::vector<Ipv4Address> outPeers, ProtocolSettings protocolSettings)
 {
   NS_LOG_FUNCTION (this);
   m_timeToRun = timeToRun;
-  m_protocol = protocol;
   m_mode = mode;
   m_systemId = systemId;
   m_outPeers = outPeers;
-  m_overlap = overlap;
-  m_reconciliationMode = reconciliationMode;
-  m_reconciliationIntervalSeconds = reconciliationIntervalSeconds * (m_peersAddresses.size() / m_outPeers.size());
+  m_protocolSettings = protocolSettings;
+  m_protocolSettings.reconciliationIntervalSeconds *= (m_peersAddresses.size() / m_outPeers.size());
   reconcilDiffsTotal = 0;
   reconcilDiffsCount = 0;
-
-  m_lowfanoutOrderOut = lowfanoutOrderOut;
-  m_lowfanoutOrderIn = lowfanoutOrderIn;
-  m_loophandlingOrder = loophandlingOrder;
-
-  m_invIntervalSeconds = invIntervalSeconds;
 
   for (auto peer: m_peersAddresses) {
     if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) == m_outPeers.end())
       m_inPeers.push_back(peer);
   }
 
-  if (m_reconciliationMode != RECON_OFF)
+  if (m_protocolSettings.reconciliationMode != RECON_OFF)
   {
       for (auto peer: m_peersAddresses)
       {
@@ -219,11 +206,11 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ProtocolType protocol, enum
   }
 
 
-  if (m_protocol == PREFERRED_ALL_DESTINATIONS) {
+  if (m_protocolSettings.protocol == PREFERRED_ALL_DESTINATIONS) {
       for (int i = 0; i < m_peersAddresses.size(); i++) {
           m_preferredPeers.push_back(m_peersAddresses.at(i));
       }
-  } else if (m_protocol == PREFERRED_OUT_DESTINATIONS) {
+  } else if (m_protocolSettings.protocol == PREFERRED_OUT_DESTINATIONS) {
       for (int i = 0; i < m_outPeers.size(); i++) {
           m_preferredPeers.push_back(m_outPeers.at(i));
       }
@@ -329,7 +316,7 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
   if (m_mode == BLACK_HOLE)
     return;
 
-  if (m_reconciliationMode != RECON_OFF) {
+  if (m_protocolSettings.reconciliationMode != RECON_OFF) {
     int nextReconciliation = 10;
     Simulator::Schedule (Seconds(nextReconciliation), &BitcoinNode::ReconcileWithPeer, this);
   }}
@@ -370,11 +357,11 @@ BitcoinNode::ReconcileWithPeer(void) {
 
     const uint8_t delimiter[] = "#";
     Ipv4Address peer;
-    if (m_reconciliationMode == TIME_BASED) {
+    if (m_protocolSettings.reconciliationMode == TIME_BASED) {
       peer = m_reconcilePeers.front();
       m_reconcilePeers.pop_front();
       m_reconcilePeers.push_back(peer);
-    } else if (m_reconciliationMode = SET_SIZE_BASED) {
+    } else if (m_protocolSettings.reconciliationMode = SET_SIZE_BASED) {
       bool peerFound = false;
       for (auto curPeer: m_reconcilePeers) {
         size_t setSize = m_peerReconciliationSets[peer].size();
@@ -385,7 +372,7 @@ BitcoinNode::ReconcileWithPeer(void) {
         }
       }
       if (!peerFound) {
-          Simulator::Schedule (Seconds(m_reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
+          Simulator::Schedule (Seconds(m_protocolSettings.reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
           return;
       }
     }
@@ -420,7 +407,7 @@ BitcoinNode::ReconcileWithPeer(void) {
       }
       return;
     }
-    Simulator::Schedule (Seconds(m_reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
+    Simulator::Schedule (Seconds(m_protocolSettings.reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
     // std::cout << m_nodeStats->nodeId << " requesting reconcil with " << set_size << std::endl;
 }
 
@@ -494,7 +481,7 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
   auto delay = PoissonNextSend(averageDelay);
 
   // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + delay + m_reconciliationIntervalSeconds * 3)
+  if (m_timeToRun < Simulator::Now().GetSeconds() + delay + m_protocolSettings.reconciliationIntervalSeconds * 3)
     return;
 
   if (m_mode != TX_EMITTER)
@@ -633,7 +620,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 std::set<int> nodeBtransactions;
                 int iMissCounter = 0;
                 std::vector<int> peerSet = m_peerReconciliationSets[peer];
-                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_protocol);
+                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_protocolSettings.qEstimationMultiplier);
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
                     peersKnowTx[txId].push_back(peer);
@@ -692,7 +679,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                   m_nodeStats->invReceivedMessages++;
                 }
                 peersKnowTx[parsedInv].push_back(peer);
-                if (m_reconciliationMode != RECON_OFF) {
+                if (m_protocolSettings.reconciliationMode != RECON_OFF) {
                   RemoveFromReconciliationSets(parsedInv, peer);
                 }
 
@@ -703,7 +690,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     } else {
                       m_nodeStats->uselessInvReceivedMessages++;
                     }
-                    if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() && m_loophandlingOrder == 1) {
+                    if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() && m_protocolSettings.loopAccomodation == 1) {
                       loopHistory.push_back(parsedInv);
                       AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
                     }
@@ -745,7 +732,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 void
 BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber)
 {
-    switch(m_protocol)
+    switch(m_protocolSettings.protocol)
     {
         case STANDARD_PROTOCOL:
         {
@@ -754,14 +741,14 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
         }
         case PREFERRED_OUT_DESTINATIONS:
         {
-			       AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_lowfanoutOrderOut);
+			       AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
              break;
         }
         case PREFERRED_ALL_DESTINATIONS:
         {
-             AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_lowfanoutOrderOut);
+             AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
 			       AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_inPeers,
-               floor(m_lowfanoutOrderIn * 1.0 / 100.0 * m_inPeers.size()));
+               floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
              break;
         }
     }
@@ -777,9 +764,9 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Address from, const int transact
     {
       auto delay = 0;
       if (std::find(m_outPeers.begin(), m_outPeers.end(), i) != m_outPeers.end())
-        delay = PoissonNextSend(m_invIntervalSeconds >> 1);
+        delay = PoissonNextSend(m_protocolSettings.invIntervalSeconds >> 1);
       else
-        delay = PoissonNextSendIncoming(m_invIntervalSeconds);
+        delay = PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber);
     }
   }
@@ -807,8 +794,7 @@ BitcoinNode::AdvertiseNewTransactionInv(Address from, const int transactionHash,
           continue;
       }
       int delay = 0;
-      // if (m_protocol != PREFERRED_OUT_DESTINATIONS)
-      delay = PoissonNextSend(m_invIntervalSeconds);
+      delay = PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, hopNumber);
       peersToRelayTo--;
       tries = peers.size();
@@ -887,7 +873,7 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from) {
   m_nodeStats->txReceivedTimes.push_back(txTime);
   knownTxHashes.push_back(txId);
   m_nodeStats->txReceived++;
-  if (m_reconciliationMode != RECON_OFF) {
+  if (m_protocolSettings.reconciliationMode != RECON_OFF) {
     AddToReconciliationSets(txId, from);
   }
 }

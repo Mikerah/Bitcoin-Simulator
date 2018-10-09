@@ -25,7 +25,7 @@ Our simulation does not take into account:
 
 # How to run this version
 
-./waf --run "default-test --nodes=10000 --publicIPNodes=1000 --minConnections=8 --maxConnections=125 --simulTime=330 --protocol=4 --reconciliation=1 --invIntervalSeconds=3 --blackHoles=0 --lowfanoutOrderIn=5 --lowfanoutOrderOut=2 --loophandlingOrder=0 --reconciliationIntervalSeconds=5"
+./waf --run "default-test --nodes=10000 --publicIPNodes=1000 --minConnections=8 --maxConnections=125 --simulTime=330 --protocol=4 --reconciliationMode=1 --invIntervalSeconds=3 --blackHoles=0 --lowfanoutOrderInPercent=5 --lowfanoutOrderOut=2 --loopAccomodation=0 --reconciliationIntervalSeconds=5"
 
 lowfanoutOrderIn: in percent of incoming peers
 lowfanoutOrderOut: in outgoing peers

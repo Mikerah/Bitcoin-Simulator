@@ -78,9 +78,8 @@ public:
    * \param nodeStats a reference to a nodeStatistics struct
    */
   void SetNodeStats(nodeStatistics *nodeStats);
-  void SetProperties(uint64_t timeToRun, enum ProtocolType protocol, enum ModeType mode, double overlap,
-    int systemId, std::vector<Ipv4Address> outPeers, int reconciliationMode, int invIntervalSeconds,
-    int reconciliationIntervalSeconds, int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder);
+  void SetProperties(uint64_t timeToRun, enum ModeType mode,
+    int systemId, std::vector<Ipv4Address> outPeers, ProtocolSettings protocolSettings);
 
 protected:
   virtual void DoDispose (void);           // inherited from Application base class.
@@ -209,20 +208,11 @@ protected:
   std::map<std::string, EventId>                      m_chunkTimeouts;                  //!< map holding the event timeouts of chunk messages
   std::map<Address, std::string>                      m_bufferedData;                   //!< map holding the buffered data from previous handleRead events
   nodeStatistics                                     *m_nodeStats;                      //!< struct holding the node stats
-  enum ProtocolType                                   m_protocol;                   //!< protocol type
   enum ModeType                                       m_mode;
 
   std::vector<int>                      loopHistory;                   // tx announcement result as a loop
 
-
-
-
-  int m_invIntervalSeconds;
-  int m_reconciliationIntervalSeconds;
-
-  int m_lowfanoutOrderOut;
-  int m_lowfanoutOrderIn;
-  int m_loophandlingOrder;
+  ProtocolSettings m_protocolSettings;
 
   uint64_t heardTotal;
   std::vector<int> firstTimeHops;
@@ -235,7 +225,6 @@ protected:
 
   Address spy;
   uint64_t       m_timeToRun;
-  int m_reconciliationMode;
 
   int reconcilDiffsTotal;
   int reconcilDiffsCount;

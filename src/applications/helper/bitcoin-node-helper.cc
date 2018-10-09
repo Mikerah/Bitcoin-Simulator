@@ -12,12 +12,11 @@ namespace ns3 {
 
 BitcoinNodeHelper::BitcoinNodeHelper (std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                                       std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                                      nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
-                                    int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder)
+                                      nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, ProtocolSettings protocolSettings)
 {
   m_factory.SetTypeId ("ns3::BitcoinNode");
   commonConstructor (netProtocol, address, peers, peersDownloadSpeeds, peersUploadSpeeds, internetSpeeds, stats,
-    invIntervalSeconds, lowfanoutOrderOut, lowfanoutOrderIn, loophandlingOrder);
+    protocolSettings);
 }
 
 BitcoinNodeHelper::BitcoinNodeHelper (void)
@@ -27,8 +26,7 @@ BitcoinNodeHelper::BitcoinNodeHelper (void)
 void
 BitcoinNodeHelper::commonConstructor(std::string netProtocol, Address address, std::vector<Ipv4Address> &peers,
                                      std::map<Ipv4Address, double> &peersDownloadSpeeds, std::map<Ipv4Address, double> &peersUploadSpeeds,
-                                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, int invIntervalSeconds,
-                                   int lowfanoutOrderOut, int lowfanoutOrderIn, int loophandlingOrder)
+                                     nodeInternetSpeeds &internetSpeeds, nodeStatistics *stats, ProtocolSettings protocolSettings)
 {
 
   m_netProtocol = netProtocol;
@@ -38,10 +36,7 @@ BitcoinNodeHelper::commonConstructor(std::string netProtocol, Address address, s
   m_peersUploadSpeeds = peersUploadSpeeds;
   m_internetSpeeds = internetSpeeds;
   m_nodeStats = stats;
-  m_invIntervalSeconds = invIntervalSeconds;
-  m_lowfanoutOrderOut = lowfanoutOrderOut;
-  m_lowfanoutOrderIn = lowfanoutOrderIn;
-  m_loophandlingOrder = loophandlingOrder;
+  m_protocolSettings = protocolSettings;
   m_factory.Set ("Protocol", StringValue (m_netProtocol));
   m_factory.Set ("Local", AddressValue (m_address));
 
@@ -88,8 +83,7 @@ BitcoinNodeHelper::InstallPriv (Ptr<Node> node)
   app->SetPeersUploadSpeeds(m_peersUploadSpeeds);
   app->SetNodeInternetSpeeds(m_internetSpeeds);
   app->SetNodeStats(m_nodeStats);
-  app->SetProperties(m_timeToRun, m_protocol,  m_mode, m_overlap, m_systemId, m_outPeers, m_reconciliationMode, m_invIntervalSeconds,
-    m_reconciliationIntervalSeconds, m_lowfanoutOrderOut, m_lowfanoutOrderIn, m_loophandlingOrder);
+  app->SetProperties(m_timeToRun, m_mode, m_systemId, m_outPeers, m_protocolSettings);
 
   node->AddApplication (app);
 
@@ -128,18 +122,13 @@ BitcoinNodeHelper::SetNodeStats (nodeStatistics *nodeStats)
 }
 
 void
-BitcoinNodeHelper::SetProperties (uint64_t timeToRun, enum ProtocolType protocol, enum ModeType mode, double overlap, int systemId,
-    std::vector<Ipv4Address> outPeers, int reconciliationMode, int reconciliationIntervalSeconds)
+BitcoinNodeHelper::SetProperties (uint64_t timeToRun, enum ModeType mode, int systemId,
+    std::vector<Ipv4Address> outPeers)
 {
   m_timeToRun = timeToRun;
-  m_protocol = protocol;
-
-  m_overlap = overlap;
   m_mode = mode;
   m_systemId = systemId;
   m_outPeers = outPeers;
-  m_reconciliationMode = reconciliationMode;
-  m_reconciliationIntervalSeconds = reconciliationIntervalSeconds;
 }
 
 

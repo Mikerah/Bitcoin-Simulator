@@ -86,15 +86,17 @@ main (int argc, char *argv[])
 
   Time::SetResolution (Time::NS);
 
-  int reconciliation = 0;
+  int reconciliationMode = 0;
   int invIntervalSeconds = 1;
   int reconciliationIntervalSeconds = 30;
   int blackHoles = 0;
 
   int lowfanoutOrderOut = 0;
-  int lowfanoutOrderIn = 0;
+  int lowfanoutOrderInPercent = 0;
 
-  int loophandlingOrder = 0;
+  int loopAccomodation = 0;
+
+  double qEstimationMultiplier = 0;
 
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
@@ -105,14 +107,17 @@ main (int argc, char *argv[])
   cmd.AddValue ("publicIPNodes", "How many nodes has public IP", publicIPNodes);
 
   cmd.AddValue ("protocol", "Used protocol: 0 — Default, 1 — Filters on links", protocol);
-  cmd.AddValue ("reconciliation", "reconciliation mode: 0 — Off, 1 — Time-based, 2 — Set size based", reconciliation);
+  cmd.AddValue ("reconciliationMode", "reconciliation mode: 0 — Off, 1 — Time-based, 2 — Set size based", reconciliationMode);
   cmd.AddValue ("invIntervalSeconds", "invIntervalSeconds", invIntervalSeconds);
   cmd.AddValue ("reconciliationIntervalSeconds", "reconciliationIntervalSeconds", reconciliationIntervalSeconds);
   cmd.AddValue ("blackHoles", "black hole nodes", blackHoles);
 
   cmd.AddValue ("lowfanoutOrderOut", "lowfanout order to out connections in units", lowfanoutOrderOut);
-  cmd.AddValue ("lowfanoutOrderIn", "lowfanout order to in connections in percent", lowfanoutOrderIn);
-  cmd.AddValue ("loophandlingOrder", "loop handling order", loophandlingOrder);
+  cmd.AddValue ("lowfanoutOrderIn", "lowfanout order to in connections in percent", lowfanoutOrderInPercent);
+  cmd.AddValue ("loopAccomodation", "0 - no, 1 - yes", loopAccomodation);
+
+
+  cmd.AddValue ("qEstimationMultiplier", "formula for estimations is in bitcoin-node.cc", qEstimationMultiplier);
 
 
   cmd.Parse(argc, argv);
@@ -165,12 +170,22 @@ main (int argc, char *argv[])
   nodesInternetSpeeds = bitcoinTopologyHelper.GetNodesInternetSpeeds();
 
 
-  std::cout << "Total nodes: " << totalNoNodes << "\n";
+
+  ProtocolSettings protocolSettings;
+  protocolSettings.protocol = ProtocolType(protocol);
+  protocolSettings.invIntervalSeconds = invIntervalSeconds;
+  protocolSettings.lowfanoutOrderInPercent = lowfanoutOrderInPercent;
+  protocolSettings.lowfanoutOrderOut = lowfanoutOrderOut;
+  protocolSettings.loopAccomodation = loopAccomodation;
+  protocolSettings.reconciliationMode = reconciliationMode;
+  protocolSettings.reconciliationIntervalSeconds = reconciliationIntervalSeconds;
+  protocolSettings.qEstimationMultiplier = qEstimationMultiplier;
+
 
   //Install simple nodes
   BitcoinNodeHelper bitcoinNodeHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), bitcoinPort),
                                         nodesConnections[0], peersDownloadSpeeds[0],  peersUploadSpeeds[0], nodesInternetSpeeds[0], stats,
-                                      invIntervalSeconds, lowfanoutOrderOut, lowfanoutOrderIn, loophandlingOrder);
+                                      protocolSettings);
   ApplicationContainer bitcoinNodes;
 
 
@@ -197,7 +212,7 @@ main (int argc, char *argv[])
         mode = BLACK_HOLE;
       }
 
-      bitcoinNodeHelper.SetProperties(simulTime, ProtocolType(protocol), mode, overlap, systemId, outPeers, reconciliation, reconciliationIntervalSeconds);
+      bitcoinNodeHelper.SetProperties(simulTime, mode, systemId, outPeers);
   	  bitcoinNodeHelper.SetNodeStats (&stats[node.first]);
       bitcoinNodes.Add(bitcoinNodeHelper.Install (targetNode));
 
