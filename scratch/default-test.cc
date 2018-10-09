@@ -113,7 +113,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("blackHoles", "black hole nodes", blackHoles);
 
   cmd.AddValue ("lowfanoutOrderOut", "lowfanout order to out connections in units", lowfanoutOrderOut);
-  cmd.AddValue ("lowfanoutOrderIn", "lowfanout order to in connections in percent", lowfanoutOrderInPercent);
+  cmd.AddValue ("lowfanoutOrderInPercent", "lowfanout order to in connections in percent", lowfanoutOrderInPercent);
   cmd.AddValue ("loopAccomodation", "0 - no, 1 - yes", loopAccomodation);
 
 
