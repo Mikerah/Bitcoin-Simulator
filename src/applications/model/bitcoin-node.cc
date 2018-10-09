@@ -652,6 +652,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 m_peerReconciliationSets[peer].clear();
                 reconcilDiffsCount++;
                 if (reconcilDiffsCount > reconcilsToNotCount) {
+                  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 3)
+                    break;
                   int totalDiff = iMissCounter + heMissCounter;
                   reconcilDiffsTotal += totalDiff;
                   reconcilSetSizeTotal += d["transactions"].Size();
