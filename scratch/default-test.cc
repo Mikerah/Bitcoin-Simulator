@@ -94,7 +94,7 @@ main (int argc, char *argv[])
   int lowfanoutOrderOut = 0;
   int lowfanoutOrderInPercent = 0;
 
-  int loopAccomodation = 0;
+  int loopAccommodation = 0;
 
   double qEstimationMultiplier = 0;
 
@@ -114,7 +114,7 @@ main (int argc, char *argv[])
 
   cmd.AddValue ("lowfanoutOrderOut", "lowfanout order to out connections in units", lowfanoutOrderOut);
   cmd.AddValue ("lowfanoutOrderInPercent", "lowfanout order to in connections in percent", lowfanoutOrderInPercent);
-  cmd.AddValue ("loopAccomodation", "0 - no, 1 - yes", loopAccomodation);
+  cmd.AddValue ("loopAccommodation", "0 - no, 1 - yes", loopAccommodation);
 
 
   cmd.AddValue ("qEstimationMultiplier", "formula for estimations is in bitcoin-node.cc", qEstimationMultiplier);
@@ -176,7 +176,7 @@ main (int argc, char *argv[])
   protocolSettings.invIntervalSeconds = invIntervalSeconds;
   protocolSettings.lowfanoutOrderInPercent = lowfanoutOrderInPercent;
   protocolSettings.lowfanoutOrderOut = lowfanoutOrderOut;
-  protocolSettings.loopAccomodation = loopAccomodation;
+  protocolSettings.loopAccommodation = loopAccommodation;
   protocolSettings.reconciliationMode = reconciliationMode;
   protocolSettings.reconciliationIntervalSeconds = reconciliationIntervalSeconds;
   protocolSettings.qEstimationMultiplier = qEstimationMultiplier;

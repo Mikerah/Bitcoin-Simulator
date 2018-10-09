@@ -690,7 +690,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     } else {
                       m_nodeStats->uselessInvReceivedMessages++;
                     }
-                    if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() && m_protocolSettings.loopAccomodation == 1) {
+                    if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() &&
+                      m_protocolSettings.loopAccommodation == 1) {
                       loopHistory.push_back(parsedInv);
                       AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
                     }

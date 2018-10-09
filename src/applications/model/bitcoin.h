@@ -123,7 +123,7 @@ typedef struct {
   ProtocolType protocol;
   int invIntervalSeconds;
 
-  int loopAccomodation;
+  int loopAccommodation;
   int lowfanoutOrderInPercent;
   int lowfanoutOrderOut;
 
