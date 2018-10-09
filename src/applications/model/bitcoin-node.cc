@@ -634,7 +634,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     }
                     iMissCounter++;
                     SaveTxData(txId, peer);
-                    AdvertiseTransactionInvWrapper(peer, txId, 0);
+                    // AdvertiseTransactionInvWrapper(peer, txId, 0);
                 }
                 int heMissCounter = 0;
                 for (int it: peerSet)
