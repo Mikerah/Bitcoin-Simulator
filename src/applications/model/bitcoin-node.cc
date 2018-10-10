@@ -303,6 +303,10 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
   if (m_mode == BLACK_HOLE)
     return;
 
+  if (m_protocolSettings.protocol == DANDELION_MAPPING) {
+    RotateDandelionDestinations();
+  }
+
   if (m_protocolSettings.reconciliationMode != RECON_OFF) {
     int nextReconciliation = 10;
     Simulator::Schedule (Seconds(nextReconciliation), &BitcoinNode::ReconcileWithPeer, this);
@@ -316,9 +320,34 @@ void BitcoinNode::LogTime() {
   if (m_timeToRun < Simulator::Now().GetSeconds()) {
     return;
   }
-
   Simulator::Schedule (Seconds(10), &BitcoinNode::LogTime, this);
 }
+
+void BitcoinNode::RotateDandelionDestinations() {
+  for (auto peer: m_peersAddresses){
+    m_dandelionDestinations[peer].clear();
+    std::vector<Ipv4Address> outPeersCopy(m_outPeers);
+    for (int i = 0; i < m_protocolSettings.lowfanoutOrderOut; i++) {
+      auto peer = ChooseFromPeers(outPeersCopy);
+      m_dandelionDestinations[peer].push_back(peer);
+      outPeersCopy.erase(std::find(outPeersCopy.begin(), outPeersCopy.end(), peer));
+    }
+
+    std::vector<Ipv4Address> inPeersCopy(m_inPeers);
+    for (int i = 0; i < m_protocolSettings.lowfanoutOrderInPercent * m_inPeers.size(); i++) {
+      auto peer = ChooseFromPeers(inPeersCopy);
+      m_dandelionDestinations[peer].push_back(peer);
+      inPeersCopy.erase(std::find(inPeersCopy.begin(), inPeersCopy.end(), peer));
+    }
+  }
+
+  if (m_timeToRun < Simulator::Now().GetSeconds()) {
+    return;
+  }
+  Simulator::Schedule (Seconds(DANDELION_ROTATION_SECONDS), &BitcoinNode::LogTime, this);
+}
+
+
 
 void
 BitcoinNode::StopApplication ()     // Called at time specified by Stop
@@ -718,35 +747,42 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 void
 BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber)
 {
+    Ipv4Address ipv4From = InetSocketAddress::ConvertFrom(from).GetIpv4();
     switch(m_protocolSettings.protocol)
     {
         case STANDARD_PROTOCOL:
         {
-            AdvertiseNewTransactionInvStandard(from, transactionHash, hopNumber);
+            AdvertiseNewTransactionInvStandard(ipv4From, transactionHash, hopNumber);
             break;
         }
         case PREFERRED_OUT_DESTINATIONS:
         {
-			       AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
+			       AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
              break;
         }
         case PREFERRED_ALL_DESTINATIONS:
         {
-             AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
-			       AdvertiseNewTransactionInv(from, transactionHash, hopNumber, m_inPeers,
+             AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
+			       AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers,
                floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
+             break;
+        }
+        case DANDELION_MAPPING:
+        {
+            AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_dandelionDestinations[ipv4From],
+               m_dandelionDestinations[ipv4From].size());
              break;
         }
     }
 }
 
 void
-BitcoinNode::AdvertiseNewTransactionInvStandard(Address from, const int transactionHash, int hopNumber)
+BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int transactionHash, int hopNumber)
 {
   NS_LOG_FUNCTION (this);
   for (Ipv4Address i: m_peersAddresses)
   {
-    if (i != InetSocketAddress::ConvertFrom(from).GetIpv4())
+    if (i != from)
     {
       auto delay = 0;
       if (std::find(m_outPeers.begin(), m_outPeers.end(), i) != m_outPeers.end())
@@ -759,7 +795,7 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Address from, const int transact
 }
 
 void
-BitcoinNode::AdvertiseNewTransactionInv(Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int peersToRelayTo)
+BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int peersToRelayTo)
 {
     NS_LOG_FUNCTION (this);
     if (peers.size() == 0)
@@ -768,7 +804,7 @@ BitcoinNode::AdvertiseNewTransactionInv(Address from, const int transactionHash,
     int tries = peers.size();
     while (peersToRelayTo > 0) {
       auto preferredPeer = ChooseFromPeers(peers);
-      bool fromPeer = (preferredPeer == InetSocketAddress::ConvertFrom(from).GetIpv4());
+      bool fromPeer = (preferredPeer == from);
       // avoid unexpected behaviour due to unordered messages
       bool recentlyReconciled = (preferredPeer == m_reconcilePeers.front() || preferredPeer == m_reconcilePeers.back());
       bool alreadyKnows = std::find(peersKnowTx[transactionHash].begin(), peersKnowTx[transactionHash].end(), preferredPeer) != peersKnowTx[transactionHash].end();

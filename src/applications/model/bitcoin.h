@@ -19,6 +19,8 @@ const int TX_EMITTERS = 1024;
 
 const int RECON_MAX_SET_SIZE = 1600;
 
+const int DANDELION_ROTATION_SECONDS = 1000;
+
 /**
  * The bitcoin message types that have been implemented.
  */
