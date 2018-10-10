@@ -344,7 +344,7 @@ void BitcoinNode::RotateDandelionDestinations() {
   if (m_timeToRun < Simulator::Now().GetSeconds()) {
     return;
   }
-  Simulator::Schedule (Seconds(DANDELION_ROTATION_SECONDS), &BitcoinNode::LogTime, this);
+  Simulator::Schedule (Seconds(DANDELION_ROTATION_SECONDS), &BitcoinNode::RotateDandelionDestinations, this);
 }
 
 
