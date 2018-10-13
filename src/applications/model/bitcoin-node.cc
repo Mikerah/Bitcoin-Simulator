@@ -492,13 +492,14 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
 {
   NS_LOG_FUNCTION (this);
 
-  // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 6)
-    return;
-
   // On average 7 transactions per second
   int averageDelay = TX_EMITTERS/7;
   auto delay = PoissonNextSend(averageDelay);
+
+
+  // Do not emit transactions which will be never reconciled in the network
+  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4 + delay)
+    return;
 
   EventId m_nextTransactionEvent = Simulator::Schedule (Seconds(delay), &BitcoinNode::EmitTransaction, this);
 }
@@ -670,7 +671,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 reconcilDiffsCount++;
                 int totalDiff = iMissCounter + heMissCounter;
                 if (reconcilDiffsCount > reconcilsToNotCount) {
-                  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 6)
+                  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4)
                     break;
                   reconcilDiffsTotal += totalDiff;
                   reconcilSetSizeTotal += d["transactions"].Size();
