@@ -396,6 +396,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliationsFailed = 0;
   long totalReconciliations = 0;
 
+  long failAfterBisection = 0;
 
   for (int it = 0; it < totalNodes; it++ )
   {
@@ -415,6 +416,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         reconcilDiffsDistr[DIFFS_DISTR_SIZE - 1]++;
       if (el.estimatedDiff < el.diffSize) {
         totalReconciliationsFailed++;
+        if (el.estimatedDiff * 1.5 < el.diffSize)
+          failAfterBisection++;
       } else {
         totalSyndromesSent += el.estimatedDiff;
         extraSyndromesSent += (el.estimatedDiff - el.diffSize);
@@ -447,6 +450,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << "Extra syndromes sent (overestimation): " << extraSyndromesSent << std::endl;
   std::cout << "Reconciliations: " << totalReconciliations << std::endl;
   std::cout << "Reconciliations failed: " << totalReconciliationsFailed << std::endl;
+  std::cout << "Reconciliations failed after 1 bisection: " << failAfterBisection << std::endl;
 
 
   std::cout << "Public nodes Average reconciliation diff = " << publicNodesAverageReconcilDiff / (publicIPNodes - blackHoles) << "\n";
