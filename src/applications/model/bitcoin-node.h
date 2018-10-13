@@ -225,6 +225,9 @@ protected:
   std::vector<Ipv4Address> m_outPeers;
   std::vector<Ipv4Address> m_inPeers;
   std::map<Ipv4Address, std::vector<Ipv4Address>> m_dandelionDestinations;
+  std::map<Ipv4Address, int> m_reconciliationHistory;
+
+
 
   Address spy;
   uint64_t       m_timeToRun;

@@ -191,6 +191,7 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
           m_peerReconciliationSets.insert(std::pair<Ipv4Address,std::vector<int>>(peer, s));
           if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) != m_outPeers.end()) {
             m_reconcilePeers.push_back(peer);
+            m_reconciliationHistory[peer] = 0;
           }
       }
   }
@@ -633,6 +634,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int iMissCounter = 0;
                 std::vector<int> peerSet = m_peerReconciliationSets[peer];
                 int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_protocolSettings.qEstimationMultiplier);
+                if (m_reconciliationHistory[peer] != 0) {
+                  // if already reconciled and there is history, try to estimate based on last diff
+                  estimatedDiff = m_reconciliationHistory[peer] *= 1.1;
+                }
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
                     peersKnowTx[txId].push_back(peer);
@@ -663,10 +668,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 }
                 m_peerReconciliationSets[peer].clear();
                 reconcilDiffsCount++;
+                int totalDiff = iMissCounter + heMissCounter;
                 if (reconcilDiffsCount > reconcilsToNotCount) {
                   if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 6)
                     break;
-                  int totalDiff = iMissCounter + heMissCounter;
                   reconcilDiffsTotal += totalDiff;
                   reconcilSetSizeTotal += d["transactions"].Size();
                   reconcilItem item;
@@ -678,6 +683,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                   m_nodeStats->reconcilData.push_back(item);
                   m_nodeStats->reconcils++;
                 }
+                m_reconciliationHistory[peer] = totalDiff;
                 break;
             }
             case INV:
