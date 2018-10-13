@@ -397,6 +397,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliations = 0;
 
   long failAfterBisection = 0;
+  long bisectionSyndromes = 0;
 
   for (int it = 0; it < totalNodes; it++ )
   {
@@ -416,8 +417,10 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         reconcilDiffsDistr[DIFFS_DISTR_SIZE - 1]++;
       if (el.estimatedDiff < el.diffSize) {
         totalReconciliationsFailed++;
-        if (el.estimatedDiff * 1.5 < el.diffSize)
+        if (el.estimatedDiff * 1.5 < el.diffSize) {
           failAfterBisection++;
+          bisectionSyndromes += el.estimatedDiff * 0.5;
+        }
       } else {
         totalSyndromesSent += el.estimatedDiff;
         extraSyndromesSent += (el.estimatedDiff - el.diffSize);
@@ -448,6 +451,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   std::cout << "Total syndromes sent: " << totalSyndromesSent << std::endl;
   std::cout << "Extra syndromes sent (overestimation): " << extraSyndromesSent << std::endl;
+  std::cout << "+ Bisection syndromes sent: " << bisectionSyndromes << std::endl;
+
   std::cout << "Reconciliations: " << totalReconciliations << std::endl;
   std::cout << "Reconciliations failed: " << totalReconciliationsFailed << std::endl;
   std::cout << "Reconciliations failed after 1 bisection: " << failAfterBisection << std::endl;
