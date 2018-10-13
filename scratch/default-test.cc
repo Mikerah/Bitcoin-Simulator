@@ -419,7 +419,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         totalReconciliationsFailed++;
         if (el.estimatedDiff * 1.5 < el.diffSize) {
           failAfterBisection++;
-          bisectionSyndromes += el.estimatedDiff * 0.5;
+          bisectionSyndromes += el.estimatedDiff * 0.75;
         }
       } else {
         totalSyndromesSent += el.estimatedDiff;
