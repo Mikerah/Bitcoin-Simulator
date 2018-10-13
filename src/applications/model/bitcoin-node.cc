@@ -637,8 +637,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_protocolSettings.qEstimationMultiplier);
                 if (m_reconciliationHistory[peer] != 0) {
                   // if already reconciled and there is history, try to estimate based on last diff
-                  m_reconciliationHistory[peer] *= m_protocolSettings.qEstimationMultiplier;
-                  estimatedDiff = m_reconciliationHistory[peer];
+                  estimatedDiff = m_reconciliationHistory[peer] * m_protocolSettings.qEstimationMultiplier;
                 }
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
