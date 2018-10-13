@@ -635,10 +635,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int iMissCounter = 0;
                 std::vector<int> peerSet = m_peerReconciliationSets[peer];
                 int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_protocolSettings.qEstimationMultiplier);
-                if (m_reconciliationHistory[peer] != 0) {
-                  // if already reconciled and there is history, try to estimate based on last diff
-                  estimatedDiff = m_reconciliationHistory[peer] * m_protocolSettings.qEstimationMultiplier;
-                }
+                estimatedDiff = (estimatedDiff * m_protocolSettings.qEstimationMultiplier + m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier))
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
                     peersKnowTx[txId].push_back(peer);
