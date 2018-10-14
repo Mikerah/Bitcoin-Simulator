@@ -520,21 +520,21 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << std::endl;
   std::cout << std::endl;
 
-  for (int i = 0; i < SETS_DISTR_SIZE; i++) {
-    std::cout << reconcilSetsDistr[i] << ", ";
-  }
-
-  std::cout << std::endl;
-  std::cout << std::endl;
-  std::cout << std::endl;
-
-  for (auto item: sizeWhenReconFailed) {
-    std::cout << item << ", ";
-  }
-
-  std::cout << std::endl;
-  std::cout << std::endl;
-  std::cout << std::endl;
+  // for (int i = 0; i < SETS_DISTR_SIZE; i++) {
+  //   std::cout << reconcilSetsDistr[i] << ", ";
+  // }
+  //
+  // std::cout << std::endl;
+  // std::cout << std::endl;
+  // std::cout << std::endl;
+  //
+  // for (auto item: sizeWhenReconFailed) {
+  //   std::cout << item << ", ";
+  // }
+  //
+  // std::cout << std::endl;
+  // std::cout << std::endl;
+  // std::cout << std::endl;
 
 
   // std::vector<double> fiftyPercentRelayTimes;
