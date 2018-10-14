@@ -402,6 +402,16 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long fallbackCost = 0;
   std::vector<long> sizeWhenReconFailed;
 
+  long setSizesPublic = 0;
+  int countSetSizesPublic = 0;
+  long setSizesPrivate = 0;
+  int countSetSizesPrivate = 0;
+
+  long overestimationPrivate = 0;
+  long overestimationPublic = 0;
+  int reconFailedPublic = 0;
+  int reconFailedPrivate = 0;
+
   for (int it = 0; it < totalNodes; it++ )
   {
     if (stats[it].mode == BLACK_HOLE)
@@ -415,6 +425,14 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     //
     for (auto el: stats[it].reconcilData) {
       int setsSize = el.setInSize + el.setOutSize;
+      if (stats[it].nodeId < publicIPNodes) {
+        setSizesPublic += setsSize;
+        countSetSizesPublic++;
+      } else {
+        setSizesPrivate += setsSize;
+        countSetSizesPrivate++;
+      }
+
       if (setsSize < SETS_DISTR_SIZE - 1)
         reconcilSetsDistr[setsSize]++;
       else
@@ -425,6 +443,11 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       else
         reconcilDiffsDistr[DIFFS_DISTR_SIZE - 1]++;
       if (el.estimatedDiff < el.diffSize) {
+        if (stats[it].nodeId < publicIPNodes) {
+          reconFailedPublic++;
+        } else {
+          reconFailedPrivate++;
+        }
         sizeWhenReconFailed.push_back(el.diffSize);
         totalReconciliationsFailed++;
         bisectionSyndromes += 1.5 * el.estimatedDiff;
@@ -435,6 +458,13 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       } else {
         totalSyndromesSent += el.estimatedDiff;
         extraSyndromesSent += (el.estimatedDiff - el.diffSize);
+        if (stats[it].nodeId < publicIPNodes) {
+          overestimationPublic += (el.estimatedDiff - el.diffSize);
+          countOverestimationPublic++;
+        } else {
+          overestimationPrivate += (el.estimatedDiff - el.diffSize);
+          countOverestimationPrivate++;
+        }
       }
       totalReconciliations++;
     }
@@ -467,7 +497,15 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   std::cout << "Reconciliations: " << totalReconciliations << std::endl;
   std::cout << "Reconciliations failed: " << totalReconciliationsFailed << std::endl;
+  std::cout << "Reconciliations failed public: " << reconFailedPublic << std::endl;
+  std::cout << "Reconciliations failed private: " << reconFailedPrivate << std::endl;
   std::cout << "Reconciliations failed after 1 bisection: " << failAfterBisection << std::endl;
+
+
+  std::cout << "Average set sizes public: " << setSizesPublic / countSetSizesPublic << std::endl;
+  std::cout << "Average set sizes private: " << setSizesPrivate / countSetSizesPrivate << std::endl;
+  std::cout << "Overestimations of public: " << overestimationPublic << std::endl;
+  std::cout << "Overestimations of private : " << overestimationPrivate << std::endl;
 
 
   std::cout << "Public nodes Average reconciliation diff = " << publicNodesAverageReconcilDiff / (publicIPNodes - blackHoles) << "\n";
