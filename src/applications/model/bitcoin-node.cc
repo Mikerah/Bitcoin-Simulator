@@ -492,16 +492,17 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
 {
   NS_LOG_FUNCTION (this);
 
-  // On average 7 transactions per second
-  int averageDelay = TX_EMITTERS/7;
-  auto delay = PoissonNextSend(averageDelay);
-
+  // 7 tx/s
+  int revProbability = TX_EMITTERS/7;
+  bool emit = (rand() % revProbability) == 0;
 
   // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4 + delay)
+  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4)
     return;
 
-  EventId m_nextTransactionEvent = Simulator::Schedule (Seconds(delay), &BitcoinNode::EmitTransaction, this);
+  if (emit)
+    EmitTransaction();
+  Simulator::Schedule (Seconds(1), &BitcoinNode::ScheduleNextTransactionEvent, this);
 }
 
 void
@@ -509,7 +510,6 @@ BitcoinNode::EmitTransaction (void)
 {
   NS_LOG_FUNCTION (this);
   int nodeId = GetNode()->GetId();
-
   m_nodeStats->txCreated++;
 
   int transactionId = nodeId*1000000 + m_nodeStats->txCreated;
@@ -517,7 +517,6 @@ BitcoinNode::EmitTransaction (void)
 
   AdvertiseTransactionInvWrapper(myself, transactionId, 0);
   SaveTxData(transactionId, myself);
-  ScheduleNextTransactionEvent();
 }
 
 
