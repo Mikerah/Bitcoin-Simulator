@@ -633,7 +633,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             {
                 std::set<int> nodeBtransactions;
                 int iMissCounter = 0;
-                std::vector<int> peerSet = m_peerReconciliationSets[peer];
+                std::vector<int> peerSet = std::vector<int>(m_peerReconciliationSets[peer]);
                 int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1);
                 estimatedDiff = (estimatedDiff * m_protocolSettings.qEstimationMultiplier +
                   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
@@ -655,13 +655,13 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int heMissCounter = 0;
                 for (int it: peerSet)
                 {
-                    // m_peerReconciliationSets[peer].clear();
+                    m_peerReconciliationSets[peer].clear();
                     if (std::find(nodeBtransactions.begin(), nodeBtransactions.end(), it) == nodeBtransactions.end())
                     {
                         // Do not inv to out peer, it will learn it later ???
                         // Due to assymetry in the network
-                        // m_peerReconciliationSets[peer].push_back(it);
-                        SendInvToNode(peer, it, RECON_HOP);
+                        m_peerReconciliationSets[peer].push_back(it);
+                        // SendInvToNode(peer, it, RECON_HOP);
                         heMissCounter++;
                     }
                 }
