@@ -15,6 +15,10 @@
 namespace ns3 {
 
 const int DIFFS_DISTR_SIZE = 350;
+const int SETS_DISTR_SIZE = 4000;
+
+
+
 const int TX_EMITTERS = 1024;
 
 const int RECON_MAX_SET_SIZE = 1600;

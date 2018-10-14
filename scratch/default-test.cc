@@ -383,6 +383,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   double privateNodesAverageReconcilSetSize;
 
   int reconcilDiffsDistr[DIFFS_DISTR_SIZE]{0};
+  int reconcilSetsDistr[SETS_DISTR_SIZE]{0};
 
 
   long invReceivedTotal = 0;
@@ -412,6 +413,12 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     // std::cout << "Tx received = " << stats[it].txReceived << "\n";
     //
     for (auto el: stats[it].reconcilData) {
+      int setsSize = el.setInSize + el.setOutSize;
+      if (setSize < SETS_DISTR_SIZE - 1)
+        reconcilSetsDistr[setsSize]++;
+      else
+        reconcilSetsDistr[SETS_DISTR_SIZE - 1]++;
+
       if (el.diffSize < DIFFS_DISTR_SIZE - 1)
         reconcilDiffsDistr[el.diffSize]++;
       else
@@ -472,6 +479,15 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     std::cout << reconcilDiffsDistr[i] << ", ";
   }
   std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+
+  for (int i = 0; i < SETS_DISTR_SIZE; i++) {
+    std::cout << reconcilSetsDistr[i] << ", ";
+  }
+  std::cout << std::endl;
+
+
 
   // std::vector<double> fiftyPercentRelayTimes;
   // std::vector<double> seventyFivePercentRelayTimes;
