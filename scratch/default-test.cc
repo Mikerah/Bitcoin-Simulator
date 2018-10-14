@@ -499,9 +499,10 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << "Reconciliations failed private: " << reconFailedPrivate << std::endl;
   std::cout << "Reconciliations failed after 1 bisection: " << failAfterBisection << std::endl;
 
-
-  std::cout << "Average set sizes public: " << setSizesPublic / countSetSizesPublic << std::endl;
-  std::cout << "Average set sizes private: " << setSizesPrivate / countSetSizesPrivate << std::endl;
+  if (countSetSizesPublic != 0)
+    std::cout << "Average set sizes public: " << setSizesPublic / countSetSizesPublic << std::endl;
+  if (countSetSizesPrivate != 0)
+    std::cout << "Average set sizes private: " << setSizesPrivate / countSetSizesPrivate << std::endl;
   std::cout << "Overestimations of public: " << overestimationPublic << std::endl;
   std::cout << "Overestimations of private : " << overestimationPrivate << std::endl;
 
