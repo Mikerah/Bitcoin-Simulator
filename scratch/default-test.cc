@@ -400,6 +400,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
   long fallbackCost = 0;
+  std::vector<long> sizeWhenReconFailed;
 
   for (int it = 0; it < totalNodes; it++ )
   {
@@ -424,6 +425,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       else
         reconcilDiffsDistr[DIFFS_DISTR_SIZE - 1]++;
       if (el.estimatedDiff < el.diffSize) {
+        sizeWhenReconFailed.push_back(el.diffSize);
         totalReconciliationsFailed++;
         bisectionSyndromes += 1.5 * el.estimatedDiff;
         if (el.estimatedDiff * 3 < el.diffSize) {
@@ -485,8 +487,18 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   for (int i = 0; i < SETS_DISTR_SIZE; i++) {
     std::cout << reconcilSetsDistr[i] << ", ";
   }
+
+  std::cout << std::endl;
+  std::cout << std::endl;
   std::cout << std::endl;
 
+  for (auto item: sizeWhenReconFailed) {
+    std::cout << item << ", ";
+  }
+
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
 
 
   // std::vector<double> fiftyPercentRelayTimes;
