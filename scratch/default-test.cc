@@ -460,10 +460,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         extraSyndromesSent += (el.estimatedDiff - el.diffSize);
         if (stats[it].nodeId < publicIPNodes) {
           overestimationPublic += (el.estimatedDiff - el.diffSize);
-          countOverestimationPublic++;
         } else {
           overestimationPrivate += (el.estimatedDiff - el.diffSize);
-          countOverestimationPrivate++;
         }
       }
       totalReconciliations++;
