@@ -250,6 +250,10 @@ protected:
   /// Traced Callback: received packets, source address.
   TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
 
+
+  // every 30 seconds
+  const std::vector<double> transactionRates = {2.66, 2.033, 14, 18, 3.6, 2.45, 2.067, 2.633, 2.067};
+
 };
 
 } // namespace ns3

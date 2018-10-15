@@ -493,7 +493,8 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
   NS_LOG_FUNCTION (this);
 
   // 7 tx/s
-  int revProbability = TX_EMITTERS/7;
+  int currentMinute = Simulator::Now().GetSeconds() / 60;
+  int revProbability = TX_EMITTERS/transactionRates[currentMinute];
   bool emit = (rand() % revProbability) == 0;
 
   // Do not emit transactions which will be never reconciled in the network
