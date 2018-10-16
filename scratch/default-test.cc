@@ -619,7 +619,7 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
 #ifdef MPI_TEST
   int            blocklen[3] = {1, 1, 1};
   MPI_Aint       disp[3];
-  MPI_Datatype   dtypes[3] = {MPI_INT, MPI_INT, MPI_INT};
+  MPI_Datatype   dtypes[3] = {MPI_INT, MPI_INT, MPI_DOUBLE};
   MPI_Datatype   mpi_txRecvTime;
 
   disp[0] = offsetof(txRecvTime, nodeId);

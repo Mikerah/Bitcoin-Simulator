@@ -70,7 +70,7 @@ enum ModeType
 typedef struct {
   int nodeId;
   int txHash;
-  int txTime;
+  double txTime;
 } txRecvTime;
 
 typedef struct {
