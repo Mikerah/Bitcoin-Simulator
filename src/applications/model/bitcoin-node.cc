@@ -662,7 +662,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                         // Do not inv to out peer, it will learn it later ???
                         // Due to assymetry in the network
                         // m_peerReconciliationSets[peer].push_back(it);
-                        SendInvToNode(peer, it, RECON_HOP);
+                        Simulator::Schedule (Seconds(0.1), &BitcoinNode::SendInvToNode, this, peer, it, RECON_HOP);
                         heMissCounter++;
                     }
                 }
@@ -792,11 +792,11 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
   {
     if (i != from)
     {
-      auto delay = 0;
+      double delay = 0.1;
       if (std::find(m_outPeers.begin(), m_outPeers.end(), i) != m_outPeers.end())
-        delay = PoissonNextSend(m_protocolSettings.invIntervalSeconds >> 1);
+        delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds >> 1);
       else
-        delay = PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
+        delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber);
     }
   }
@@ -823,8 +823,8 @@ BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionH
         else
           continue;
       }
-      int delay = 0;
-      delay = PoissonNextSend(m_protocolSettings.invIntervalSeconds);
+      double delay = 0.1;
+      delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, hopNumber);
       peersToRelayTo--;
       tries = peers.size();
