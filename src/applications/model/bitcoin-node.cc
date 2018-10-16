@@ -296,6 +296,7 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
   m_nodeStats->reconcils = 0;
 
   m_nodeStats->mode = m_mode;
+  m_nodeStats->onTheFlyCollisions = 0;
 
   if (m_nodeStats->nodeId == 1) {
     LogTime();
@@ -692,6 +693,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
               {
                 int   parsedInv = d["inv"][j].GetInt();
                 int   hopNumber = d["hop"].GetInt();
+                if (std::find(peersKnowTx[parsedInv].begin(), peersKnowTx[parsedInv].end(), peer) != peersKnowTx[parsedInv].end())
+                  m_nodeStats->onTheFlyCollisions++;
                 if (hopNumber == RECON_HOP ) {
                   m_nodeStats->reconInvReceivedMessages++;
                 } else {

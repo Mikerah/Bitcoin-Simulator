@@ -95,6 +95,7 @@ typedef struct {
   long     txCreated;
   int      connections;
   double firstSpySuccess;
+  long onTheFlyCollisions;
 
   int txReceived;
   int systemId;

@@ -241,11 +241,11 @@ main (int argc, char *argv[])
 
   #ifdef MPI_TEST
 
-    int            blocklen[15] = {1, 1, 1, 1, 1, 1, 1, 1,
-                                   1, 1, 1, 1, 1, 1, 1};
-    MPI_Aint       disp[15];
-    MPI_Datatype   dtypes[15] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
-                                 MPI_DOUBLE, MPI_INT, MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT, MPI_INT, MPI_INT};
+    int            blocklen[16] = {1, 1, 1, 1, 1, 1, 1, 1,
+                                   1, 1, 1, 1, 1, 1, 1, 1};
+    MPI_Aint       disp[16];
+    MPI_Datatype   dtypes[16] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
+                                 MPI_DOUBLE, MPI_LONG, MPI_INT, MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT, MPI_INT, MPI_INT};
     MPI_Datatype   mpi_nodeStatisticsType;
 
     disp[0] = offsetof(nodeStatistics, nodeId);
@@ -256,13 +256,14 @@ main (int argc, char *argv[])
     disp[5] = offsetof(nodeStatistics, txCreated);
     disp[6] = offsetof(nodeStatistics, connections);
     disp[7] = offsetof(nodeStatistics, firstSpySuccess);
-    disp[8] = offsetof(nodeStatistics, txReceived);
-    disp[9] = offsetof(nodeStatistics, systemId);
-    disp[10] = offsetof(nodeStatistics, ignoredFilters);
-    disp[11] = offsetof(nodeStatistics, reconcilDiffsAverage);
-    disp[12] = offsetof(nodeStatistics, reconcilSetSizeAverage);
-    disp[13] = offsetof(nodeStatistics, reconcils);
-    disp[14] = offsetof(nodeStatistics, mode);
+    disp[8] = offsetof(nodeStatistics, onTheFlyCollisions);
+    disp[9] = offsetof(nodeStatistics, txReceived);
+    disp[10] = offsetof(nodeStatistics, systemId);
+    disp[11] = offsetof(nodeStatistics, ignoredFilters);
+    disp[12] = offsetof(nodeStatistics, reconcilDiffsAverage);
+    disp[13] = offsetof(nodeStatistics, reconcilSetSizeAverage);
+    disp[14] = offsetof(nodeStatistics, reconcils);
+    disp[15] = offsetof(nodeStatistics, mode);
 
 
     MPI_Type_create_struct (15, blocklen, disp, dtypes, &mpi_nodeStatisticsType);
@@ -298,6 +299,7 @@ main (int argc, char *argv[])
         stats[recv.nodeId].reconInvReceivedMessages = recv.reconInvReceivedMessages;
         stats[recv.nodeId].reconUselessInvReceivedMessages = recv.reconUselessInvReceivedMessages;
         stats[recv.nodeId].firstSpySuccess = recv.firstSpySuccess;
+        stats[recv.nodeId].onTheFlyCollisions = recv.onTheFlyCollisions;
         stats[recv.nodeId].txReceived = recv.txReceived;
         stats[recv.nodeId].systemId = recv.systemId;
         stats[recv.nodeId].ignoredFilters = recv.ignoredFilters;
@@ -412,6 +414,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   int reconFailedPublic = 0;
   int reconFailedPrivate = 0;
 
+  long totalOnTheFlyCollisions = 0;
+
   for (int it = 0; it < totalNodes; it++ )
   {
     if (stats[it].mode == BLACK_HOLE)
@@ -472,6 +476,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     reconInvReceivedTotal += stats[it].reconInvReceivedMessages;
     reconUselessInvReceivedTotal += stats[it].reconUselessInvReceivedMessages;
 
+    totalOnTheFlyCollisions += stats[it].onTheFlyCollisions;
 
     for (int txCount = 0; txCount < stats[it].txReceived; txCount++)
     {
@@ -484,6 +489,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   std::cout << "INVs sent in the network: " << invReceivedTotal << std::endl;
   std::cout << "Useless % INVs in the network: " << uselessInvReceivedTotal * 1.0 / invReceivedTotal << std::endl;
+  std::cout << "On the fly collisions in the network: " << totalOnTheFlyCollisions << std::endl;
+
 
   std::cout << "Recon INVs sent in the network: " << reconInvReceivedTotal << std::endl;
   std::cout << "Recon Useless % INVs in the network: " << reconUselessInvReceivedTotal * 1.0 / reconInvReceivedTotal << std::endl;
