@@ -225,7 +225,7 @@ protected:
   std::vector<Ipv4Address> m_outPeers;
   std::vector<Ipv4Address> m_inPeers;
   std::map<Ipv4Address, std::vector<Ipv4Address>> m_dandelionDestinations;
-  std::map<Ipv4Address, int> m_reconciliationHistory;
+  std::map<Ipv4Address, std::vector<int>> m_reconciliationHistory;
 
 
 

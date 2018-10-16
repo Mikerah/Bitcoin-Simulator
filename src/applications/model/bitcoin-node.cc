@@ -191,7 +191,7 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
           m_peerReconciliationSets.insert(std::pair<Ipv4Address,std::vector<int>>(peer, s));
           if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) != m_outPeers.end()) {
             m_reconcilePeers.push_back(peer);
-            m_reconciliationHistory[peer] = 0;
+            m_reconciliationHistory[peer] = std::vector<int>(4, 0);
           }
       }
   }
@@ -635,11 +635,11 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 std::set<int> nodeBtransactions;
                 int iMissCounter = 0;
                 std::vector<int> peerSet = std::vector<int>(m_peerReconciliationSets[peer]);
-                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1);
-                estimatedDiff = (estimatedDiff * m_protocolSettings.qEstimationMultiplier +
-                  m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
+                int mySubSetSize[SUB_SETS] = {0};
+                int hisSubSetSize[SUB_SETS] = {0};
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
+                    hisSubSetSize[MurmurHash3Mixer(txId) % SUB_SETS]++;
                     peersKnowTx[txId].push_back(peer);
                     nodeBtransactions.insert(txId);
                     if (std::find(peerSet.begin(), peerSet.end(), txId) != peerSet.end()) {
@@ -656,6 +656,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int heMissCounter = 0;
                 for (int it: peerSet)
                 {
+                    mySubSetSize[MurmurHash3Mixer(it) % SUB_SETS]++;
                     // m_peerReconciliationSets[peer].clear();
                     if (std::find(nodeBtransactions.begin(), nodeBtransactions.end(), it) == nodeBtransactions.end())
                     {
@@ -672,6 +673,16 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 if (reconcilDiffsCount > reconcilsToNotCount) {
                   if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4)
                     break;
+
+                  // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
+                  //   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
+
+                  int estimatedDiff = 0;
+                  for (int i = 0; i < SUB_SETS; i++) {
+                    estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
+                  }
+
+
                   reconcilDiffsTotal += totalDiff;
                   reconcilSetSizeTotal += d["transactions"].Size();
                   reconcilItem item;
@@ -683,7 +694,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                   m_nodeStats->reconcilData.push_back(item);
                   m_nodeStats->reconcils++;
                 }
-                m_reconciliationHistory[peer] = totalDiff;
+                // m_reconciliationHistory[peer] = totalDiff;
+
                 break;
             }
             case INV:
