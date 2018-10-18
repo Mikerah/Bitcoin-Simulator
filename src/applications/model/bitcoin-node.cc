@@ -31,6 +31,8 @@ NS_OBJECT_ENSURE_REGISTERED (BitcoinNode);
 
 int reconcilsToNotCount = 3;
 
+int timeNotToCount = 20;
+
 int RECON_HOP = 999;
 
 
@@ -499,7 +501,7 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
   bool emit = (rand() % revProbability) == 0;
 
   // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4)
+  if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
     return;
 
   if (emit)
@@ -671,7 +673,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 reconcilDiffsCount++;
                 int totalDiff = iMissCounter + heMissCounter;
                 if (reconcilDiffsCount > reconcilsToNotCount) {
-                  if (m_timeToRun < Simulator::Now().GetSeconds() + m_protocolSettings.reconciliationIntervalSeconds * 4)
+                  if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
                     break;
 
                   // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
