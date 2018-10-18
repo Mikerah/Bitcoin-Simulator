@@ -807,9 +807,9 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
     if (i != from)
     {
       double delay = 0.1;
-      if (std::find(m_outPeers.begin(), m_outPeers.end(), i) != m_outPeers.end())
-        delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds >> 1);
-      else
+      // if (std::find(m_outPeers.begin(), m_outPeers.end(), i) != m_outPeers.end())
+      //   delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds >> 1);
+      // else
         delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber);
     }
