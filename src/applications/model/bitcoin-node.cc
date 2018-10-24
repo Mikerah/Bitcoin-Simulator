@@ -29,8 +29,6 @@ NS_LOG_COMPONENT_DEFINE ("BitcoinNode");
 
 NS_OBJECT_ENSURE_REGISTERED (BitcoinNode);
 
-int reconcilsToNotCount = 3;
-
 int timeNotToCount = 20;
 
 int RECON_HOP = 999;
@@ -177,8 +175,6 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
   m_outPeers = outPeers;
   m_protocolSettings = protocolSettings;
   m_protocolSettings.reconciliationIntervalSeconds *= (m_peersAddresses.size() / m_outPeers.size());
-  reconcilDiffsTotal = 0;
-  reconcilDiffsCount = 0;
 
   for (auto peer: m_peersAddresses) {
     if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) == m_outPeers.end())
@@ -291,9 +287,6 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
   m_nodeStats->txReceived = 0;
 
   m_nodeStats->systemId = m_systemId;
-
-  m_nodeStats->reconcilDiffsAverage = 0;
-  m_nodeStats->reconcilSetSizeAverage = 0;
 
   m_nodeStats->reconcils = 0;
 
@@ -420,13 +413,6 @@ BitcoinNode::ReconcileWithPeer(void) {
     m_peersSockets[peer]->Send(delimiter, 1, 0);
 
     if (m_timeToRun < Simulator::Now().GetSeconds()) {
-      if (reconcilDiffsCount <= reconcilsToNotCount) {
-        m_nodeStats->reconcilDiffsAverage = 0;
-        m_nodeStats->reconcilSetSizeAverage = 0;
-      } else {
-        m_nodeStats->reconcilDiffsAverage = reconcilDiffsTotal / (reconcilDiffsCount - reconcilsToNotCount);
-        m_nodeStats->reconcilSetSizeAverage = reconcilSetSizeTotal / (reconcilDiffsCount - reconcilsToNotCount);
-      }
       return;
     }
     Simulator::Schedule (Seconds(m_protocolSettings.reconciliationIntervalSeconds), &BitcoinNode::ReconcileWithPeer, this);
@@ -670,32 +656,26 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     }
                 }
                 m_peerReconciliationSets[peer].clear();
-                reconcilDiffsCount++;
                 int totalDiff = iMissCounter + heMissCounter;
-                if (reconcilDiffsCount > reconcilsToNotCount) {
-                  if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
-                    break;
+                if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
+                  break;
 
-                  // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
-                  //   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
+                // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
+                //   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
 
-                  int estimatedDiff = 0;
-                  for (int i = 0; i < SUB_SETS; i++) {
-                    estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
-                  }
-
-
-                  reconcilDiffsTotal += totalDiff;
-                  reconcilSetSizeTotal += d["transactions"].Size();
-                  reconcilItem item;
-                  item.setInSize = d["transactions"].Size();
-                  item.setOutSize = peerSet.size();
-                  item.diffSize = totalDiff;
-                  item.estimatedDiff = estimatedDiff;
-                  item.nodeId = m_nodeStats->nodeId;
-                  m_nodeStats->reconcilData.push_back(item);
-                  m_nodeStats->reconcils++;
+                int estimatedDiff = 0;
+                for (int i = 0; i < SUB_SETS; i++) {
+                  estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
                 }
+
+                reconcilItem item;
+                item.setInSize = d["transactions"].Size();
+                item.setOutSize = peerSet.size();
+                item.diffSize = totalDiff;
+                item.estimatedDiff = estimatedDiff;
+                item.nodeId = m_nodeStats->nodeId;
+                m_nodeStats->reconcilData.push_back(item);
+                m_nodeStats->reconcils++;
                 // m_reconciliationHistory[peer] = totalDiff;
 
                 break;

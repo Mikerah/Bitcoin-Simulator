@@ -241,11 +241,11 @@ main (int argc, char *argv[])
 
   #ifdef MPI_TEST
 
-    int            blocklen[16] = {1, 1, 1, 1, 1, 1, 1, 1,
+    int            blocklen[14] = {1, 1, 1, 1, 1, 1,
                                    1, 1, 1, 1, 1, 1, 1, 1};
-    MPI_Aint       disp[16];
-    MPI_Datatype   dtypes[16] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
-                                 MPI_DOUBLE, MPI_LONG, MPI_INT, MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT, MPI_INT, MPI_INT};
+    MPI_Aint       disp[14];
+    MPI_Datatype   dtypes[14] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
+                                 MPI_DOUBLE, MPI_LONG, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
     MPI_Datatype   mpi_nodeStatisticsType;
 
     disp[0] = offsetof(nodeStatistics, nodeId);
@@ -260,13 +260,11 @@ main (int argc, char *argv[])
     disp[9] = offsetof(nodeStatistics, txReceived);
     disp[10] = offsetof(nodeStatistics, systemId);
     disp[11] = offsetof(nodeStatistics, ignoredFilters);
-    disp[12] = offsetof(nodeStatistics, reconcilDiffsAverage);
-    disp[13] = offsetof(nodeStatistics, reconcilSetSizeAverage);
-    disp[14] = offsetof(nodeStatistics, reconcils);
-    disp[15] = offsetof(nodeStatistics, mode);
+    disp[12] = offsetof(nodeStatistics, reconcils);
+    disp[13] = offsetof(nodeStatistics, mode);
 
 
-    MPI_Type_create_struct (15, blocklen, disp, dtypes, &mpi_nodeStatisticsType);
+    MPI_Type_create_struct (14, blocklen, disp, dtypes, &mpi_nodeStatisticsType);
     MPI_Type_commit (&mpi_nodeStatisticsType);
 
     if (systemId != 0 && systemCount > 1)
@@ -303,8 +301,6 @@ main (int argc, char *argv[])
         stats[recv.nodeId].txReceived = recv.txReceived;
         stats[recv.nodeId].systemId = recv.systemId;
         stats[recv.nodeId].ignoredFilters = recv.ignoredFilters;
-        stats[recv.nodeId].reconcilDiffsAverage = recv.reconcilDiffsAverage;
-        stats[recv.nodeId].reconcilSetSizeAverage = recv.reconcilSetSizeAverage;
         stats[recv.nodeId].reconcils = recv.reconcils;
         stats[recv.nodeId].mode = recv.mode;
   	    count++;

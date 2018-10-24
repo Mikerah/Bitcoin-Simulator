@@ -105,9 +105,6 @@ typedef struct {
   std::vector<txRecvTime> txReceivedTimes;
   int ignoredFilters;
 
-  double reconcilDiffsAverage;
-  int reconcilSetSizeAverage;
-
   int reconcils;
   std::vector<reconcilItem> reconcilData;
 

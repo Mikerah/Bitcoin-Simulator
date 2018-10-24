@@ -232,10 +232,6 @@ protected:
   Address spy;
   uint64_t       m_timeToRun;
 
-  int reconcilDiffsTotal;
-  int reconcilDiffsCount;
-  int reconcilSetSizeTotal;
-
   const int       m_bitcoinPort;               //!< 8333
   const int       m_secondsPerMin;             //!< 60
   const int       m_countBytes;                //!< The size of count variable in messages, 4 Bytes
