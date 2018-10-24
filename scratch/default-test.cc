@@ -416,6 +416,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   long totalOnTheFlyCollisions = 0;
 
+  std::vector<int> ratiosA;
+
   for (int it = 0; it < totalNodes; it++ )
   {
     if (stats[it].mode == BLACK_HOLE)
@@ -469,6 +471,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         }
       }
       totalReconciliations++;
+
+      ratiosA.push_back((el.diffSize - std::abs(el.setInSize - el.setOutSize)) / std::min(el.setInSize, el.setOutSize));
     }
     invReceivedTotal += stats[it].invReceivedMessages;
     uselessInvReceivedTotal += stats[it].uselessInvReceivedMessages;
@@ -484,6 +488,14 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       allTxRelayTimes[txTime.txHash].push_back(txTime.txTime);
     }
   }
+
+  std::cout << "Distribution of ratios A" << std::endl;
+  for (auto a: ratiosA) {
+    std::cout << a << ", ";
+  }
+
+  std::cout << "End distribution of ratios A" << std::endl;
+
   int activeNodes = totalNodes - blackHoles;
 
 
