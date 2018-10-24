@@ -472,7 +472,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       }
       totalReconciliations++;
       int curA = (el.diffSize - std::abs(el.setInSize - el.setOutSize)) * 100 / std::min(el.setInSize, el.setOutSize);
-      ratiosA.push_back(curA);
+      if (curA > 99)
+        curA = 99;
+      ratiosA[curA]++;
     }
     invReceivedTotal += stats[it].invReceivedMessages;
     uselessInvReceivedTotal += stats[it].uselessInvReceivedMessages;
