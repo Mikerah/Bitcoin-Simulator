@@ -416,7 +416,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   long totalOnTheFlyCollisions = 0;
 
-  std::vector<int> ratiosA;
+  std::vector<double> ratiosA(100, 0);
 
   for (int it = 0; it < totalNodes; it++ )
   {
@@ -471,8 +471,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         }
       }
       totalReconciliations++;
-
-      ratiosA.push_back((el.diffSize - std::abs(el.setInSize - el.setOutSize)) / std::min(el.setInSize, el.setOutSize));
+      int curA = (el.diffSize - std::abs(el.setInSize - el.setOutSize)) * 100 / std::min(el.setInSize, el.setOutSize);
+      ratiosA.push_back(curA);
     }
     invReceivedTotal += stats[it].invReceivedMessages;
     uselessInvReceivedTotal += stats[it].uselessInvReceivedMessages;
