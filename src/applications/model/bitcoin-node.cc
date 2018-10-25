@@ -663,10 +663,12 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
                 //   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
 
-                int estimatedDiff = 0;
-                for (int i = 0; i < SUB_SETS; i++) {
-                  estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
-                }
+                // int estimatedDiff = 0;
+                // for (int i = 0; i < SUB_SETS; i++) {
+                //   estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
+                // }
+
+                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1);
 
                 reconcilItem item;
                 item.setInSize = d["transactions"].Size();
