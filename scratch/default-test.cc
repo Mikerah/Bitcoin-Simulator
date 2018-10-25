@@ -471,7 +471,10 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         int curA = (el.diffSize - std::abs(el.setInSize - el.setOutSize)) * 100 / std::min(el.setInSize, el.setOutSize);
         if (curA > 99)
           curA = 99;
-        ratiosA[curA]++;        
+        if (curA < 0)
+        // This happens due to delays in the network, very rarely though.
+          curA = 0;
+        ratiosA[curA]++;
       }
     }
     invReceivedTotal += stats[it].invReceivedMessages;
