@@ -452,8 +452,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         }
         sizeWhenReconFailed.push_back(el.diffSize);
         totalReconciliationsFailed++;
-        bisectionSyndromes += 1.5 * el.estimatedDiff;
-        if (el.estimatedDiff * 3 < el.diffSize) {
+        int bisectionRate = 1;
+        bisectionSyndromes += bisectionRate * el.estimatedDiff;
+        if (el.estimatedDiff * (bisectionRate + 1) < el.diffSize) {
           failAfterBisection++;
           fallbackCost += (el.setInSize + el.setOutSize);
         }
