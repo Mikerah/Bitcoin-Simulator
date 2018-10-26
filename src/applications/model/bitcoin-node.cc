@@ -670,8 +670,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 //   estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
                 // }
 
-                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_prevA);
+                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_prevA) * 1.1;
                 m_prevA = totalDiff / (peerSet.size() + d["transactions"].Size());
+
+
 
                 reconcilItem item;
                 item.setInSize = d["transactions"].Size();
