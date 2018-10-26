@@ -176,6 +176,8 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
   m_protocolSettings = protocolSettings;
   m_protocolSettings.reconciliationIntervalSeconds *= (m_peersAddresses.size() / m_outPeers.size());
 
+  m_prevA = A_ESTIMATOR;
+
   for (auto peer: m_peersAddresses) {
     if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) == m_outPeers.end())
       m_inPeers.push_back(peer);
@@ -668,7 +670,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 //   estimatedDiff += EstimateDifference(mySubSetSize[i], hisSubSetSize[i], 0.1);
                 // }
 
-                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1);
+                int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_prevA);
+                m_prevA = totalDiff / (peerSet.size() + d["transactions"].Size());
 
                 reconcilItem item;
                 item.setInSize = d["transactions"].Size();

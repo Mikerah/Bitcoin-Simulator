@@ -27,6 +27,8 @@ const int RECON_MAX_SET_SIZE = 1600;
 
 const int DANDELION_ROTATION_SECONDS = 1000;
 
+const double A_ESTIMATOR = 0.04;
+
 /**
  * The bitcoin message types that have been implemented.
  */

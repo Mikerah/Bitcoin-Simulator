@@ -196,6 +196,8 @@ protected:
   uint32_t gotGetData;
 
 
+  double m_prevA;
+
   std::map<int, std::vector<Ipv4Address>>     peersKnowTx;
 
   std::map<Ipv4Address, std::vector<int>>     m_peerReconciliationSets;         //!< Set of all txs we've seen, to be reconciled with peers
@@ -248,7 +250,7 @@ protected:
 
 
   // every 30 seconds
-  const std::vector<double> transactionRates = {2.66, 2.033, 14, 18, 3.6, 2.45, 2.067, 2.633, 2.067};
+  const std::vector<double> transactionRates = {2.66, 2.033, 14, 14, 3.6, 2.45, 2.067, 9, 2.067};
 
 };
 
