@@ -671,7 +671,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 // }
 
                 int estimatedDiff = EstimateDifference(peerSet.size(), d["transactions"].Size(), m_prevA) * m_protocolSettings.qEstimationMultiplier;
-                m_prevA = totalDiff / (peerSet.size() + d["transactions"].Size());
+                m_prevA = (totalDiff-std::abs(peerSet.size() - d["transactions"].Size())) / std::min(peerSet.size(), d["transactions"].Size());
 
 
 
