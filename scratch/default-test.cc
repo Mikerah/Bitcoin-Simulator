@@ -182,6 +182,7 @@ main (int argc, char *argv[])
   protocolSettings.qEstimationMultiplier = qEstimationMultiplier;
 
 
+
   //Install simple nodes
   BitcoinNodeHelper bitcoinNodeHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), bitcoinPort),
                                         nodesConnections[0], peersDownloadSpeeds[0],  peersUploadSpeeds[0], nodesInternetSpeeds[0], stats,
@@ -452,7 +453,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         }
         sizeWhenReconFailed.push_back(el.diffSize);
         totalReconciliationsFailed++;
-        int bisectionRate = 7;
+        int bisectionRate = 3;
         bisectionSyndromes += bisectionRate * el.estimatedDiff;
         if (el.estimatedDiff * (bisectionRate + 1) < el.diffSize) {
           failAfterBisection++;
