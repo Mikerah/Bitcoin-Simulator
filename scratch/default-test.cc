@@ -37,7 +37,7 @@ using namespace ns3;
 
 double get_wall_time();
 int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr);
-void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles);
+void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate);
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
@@ -98,6 +98,8 @@ main (int argc, char *argv[])
 
   double qEstimationMultiplier = 0;
 
+  int bisectionRate = 0;
+
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
   cmd.AddValue ("minConnections", "The minConnectionsPerNode of the grid", minConnectionsPerNode);
@@ -118,7 +120,7 @@ main (int argc, char *argv[])
 
 
   cmd.AddValue ("qEstimationMultiplier", "formula for estimations is in bitcoin-node.cc", qEstimationMultiplier);
-
+  cmd.AddValue ("bisectionRate", "how many bisection sets of syndromes to send (0, 1, 3, 7, ...2^n-1)", bisectionRate);
 
   cmd.Parse(argc, argv);
 
@@ -369,7 +371,7 @@ int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr)
   return -1; //if not found
 }
 
-void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles)
+void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate)
 {
   std::map<int, std::vector<double>> allTxRelayTimes;
 
@@ -453,7 +455,6 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         }
         sizeWhenReconFailed.push_back(el.diffSize);
         totalReconciliationsFailed++;
-        int bisectionRate = 3;
         bisectionSyndromes += bisectionRate * el.estimatedDiff;
         if (el.estimatedDiff * (bisectionRate + 1) < el.diffSize) {
           failAfterBisection++;
