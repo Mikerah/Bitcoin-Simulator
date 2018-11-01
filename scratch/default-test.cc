@@ -319,7 +319,7 @@ main (int argc, char *argv[])
   {
     tFinish=get_wall_time();
 
-    PrintStatsForEachNode(stats, totalNoNodes, publicIPNodes, blackHoles);
+    PrintStatsForEachNode(stats, totalNoNodes, publicIPNodes, blackHoles, bisectionRate);
 
 
     std::cout << "\nThe simulation ran for " << tFinish - tStart << "s simulating "
