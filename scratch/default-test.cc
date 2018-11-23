@@ -444,7 +444,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         reconcilSetsDistr[SETS_DISTR_SIZE - 1]++;
 
       if (el.setOutSize < SETS_DISTR_SIZE - 1)
-        reconcilSetsDistr[setOutSize]++;
+        reconcilSetsDistr[el.setOutSize]++;
       else
         reconcilSetsDistr[SETS_DISTR_SIZE - 1]++;
 
