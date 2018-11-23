@@ -673,7 +673,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int mySetSize = peerSet.size();
                 int hisSetSize = d["transactions"].Size();
                 int estimatedDiff = EstimateDifference(mySetSize, hisSetSize, m_prevA) + m_protocolSettings.qEstimationMultiplier;
-                if (mySetSize * hisSetSize != 0)
+                if (mySetSize * hisSetSize != 0 && estimatedDiff >= mySetSize + hisSetSize)
                   m_prevA = (totalDiff-std::abs(mySetSize - hisSetSize)) / std::min(mySetSize, hisSetSize);
 
                 reconcilItem item;

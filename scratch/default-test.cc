@@ -438,10 +438,16 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
         countSetSizesPrivate++;
       }
 
-      if (setsSize < SETS_DISTR_SIZE - 1)
-        reconcilSetsDistr[setsSize]++;
+      if (el.setInSize < SETS_DISTR_SIZE - 1)
+        reconcilSetsDistr[el.setInSize]++;
       else
         reconcilSetsDistr[SETS_DISTR_SIZE - 1]++;
+
+      if (el.setOutSize < SETS_DISTR_SIZE - 1)
+        reconcilSetsDistr[setOutSize]++;
+      else
+        reconcilSetsDistr[SETS_DISTR_SIZE - 1]++;
+
 
       if (el.diffSize < DIFFS_DISTR_SIZE - 1)
         reconcilDiffsDistr[el.diffSize]++;
@@ -539,21 +545,22 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << "Private nodes Average reconciliation set size = " << privateNodesAverageReconcilSetSize / (totalNodes - publicIPNodes) << "\n";
 
 
+  std::cout << "Differences distribution" << std::endl;
   for (int i = 0; i < DIFFS_DISTR_SIZE; i++) {
     std::cout << reconcilDiffsDistr[i] << ", ";
   }
+
+  std::cout << std::endl <<  "Set sizes distribution" << std::endl;
+
+  for (int i = 0; i < SETS_DISTR_SIZE; i++) {
+    std::cout << reconcilSetsDistr[i] << ", ";
+  }
+
+
   std::cout << std::endl;
   std::cout << std::endl;
   std::cout << std::endl;
 
-  // for (int i = 0; i < SETS_DISTR_SIZE; i++) {
-  //   std::cout << reconcilSetsDistr[i] << ", ";
-  // }
-  //
-  // std::cout << std::endl;
-  // std::cout << std::endl;
-  // std::cout << std::endl;
-  //
   // for (auto item: sizeWhenReconFailed) {
   //   std::cout << item << ", ";
   // }
