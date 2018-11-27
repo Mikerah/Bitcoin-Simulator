@@ -570,7 +570,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
           rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
           d.Accept(writer);
 
+
+          NS_LOG_INFO("574");
           Ipv4Address peer = InetSocketAddress::ConvertFrom(from).GetIpv4();
+          NS_LOG_INFO("576");
 
           NS_LOG_INFO ("At time "  << Simulator::Now ().GetSeconds ()
                         << "s bitcoin node " << GetNode ()->GetId () << " received "
@@ -585,7 +588,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case MODE:
             {
               ModeType mode = ModeType(d["mode"].GetInt());
-              peersMode[InetSocketAddress::ConvertFrom(from).GetIpv4()] = mode;
+              peersMode[peer] = mode;
               break;
             }
             case RECONCILE_TX_REQUEST:
