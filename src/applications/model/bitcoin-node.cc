@@ -505,7 +505,9 @@ BitcoinNode::EmitTransaction (void)
   m_nodeStats->txCreated++;
 
   int transactionId = nodeId*1000000 + m_nodeStats->txCreated;
+  NS_LOG_INFO("E");
   auto myself = InetSocketAddress::ConvertFrom(m_local).GetIpv4();
+  NS_LOG_INFO("F");
 
   AdvertiseTransactionInvWrapper(myself, transactionId, 0);
   SaveTxData(transactionId, myself);
@@ -761,7 +763,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 void
 BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber)
 {
+    NS_LOG_INFO("A");
     Ipv4Address ipv4From = InetSocketAddress::ConvertFrom(from).GetIpv4();
+    NS_LOG_INFO("B");
+
     switch(m_protocolSettings.protocol)
     {
         case STANDARD_PROTOCOL:
@@ -887,7 +892,9 @@ BitcoinNode::SendMessage(enum Messages receivedMessage,  enum Messages responseM
   d["message"].SetInt(responseMessage);
   d.Accept(writer);
 
+  NS_LOG_INFO("C");
   Ipv4Address outgoingIpv4Address = InetSocketAddress::ConvertFrom(outgoingAddress).GetIpv4 ();
+  NS_LOG_INFO("D");
   std::map<Ipv4Address, Ptr<Socket>>::iterator it = m_peersSockets.find(outgoingIpv4Address);
 
   if (it == m_peersSockets.end()) //Create the socket if it doesn't exist
