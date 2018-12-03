@@ -801,15 +801,16 @@ void
 BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int transactionHash, int hopNumber)
 {
   NS_LOG_FUNCTION (this);
+  assert(m_protocolSettings.protocol == STANDARD_PROTOCOL);
   for (Ipv4Address i: m_peersAddresses)
   {
     if (i != from)
     {
       double delay = 0.1;
-      if (m_protocolSettings.protocol == STANDARD_PROTOCOL && std::find(m_outPeers.begin(), m_outPeers.end(), i) == m_outPeers.end())
-        delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds * 2);
+      if (std::find(m_outPeers.begin(), m_outPeers.end(), i) == m_outPeers.end())
+        delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       else
-        delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
+        delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds >> 1);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber);
     }
   }
