@@ -378,6 +378,7 @@ BitcoinNode::ReconcileWithPeer(void) {
     if (m_protocolSettings.reconciliationMode == TIME_BASED) {
       peer = m_reconcilePeers.front();
       if (m_protocolSettings.bhDetection && peersMode[peer] == BLACK_HOLE) {
+        m_reconcilePeers.pop_front();
         peer = m_reconcilePeers.front();
       }
       m_reconcilePeers.pop_front();
