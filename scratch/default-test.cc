@@ -100,6 +100,8 @@ main (int argc, char *argv[])
 
   int bisectionRate = 0;
 
+  bool bhDetection = false;
+
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
   cmd.AddValue ("minConnections", "The minConnectionsPerNode of the grid", minConnectionsPerNode);
@@ -121,6 +123,7 @@ main (int argc, char *argv[])
 
   cmd.AddValue ("qEstimationMultiplier", "formula for estimations is in bitcoin-node.cc", qEstimationMultiplier);
   cmd.AddValue ("bisectionRate", "how many bisection sets of syndromes to send (0, 1, 3, 7, ...2^n-1)", bisectionRate);
+  cmd.AddValue ("bhDetection", "black holes trivial detection", bhDetection);
 
   cmd.Parse(argc, argv);
 
@@ -180,6 +183,7 @@ main (int argc, char *argv[])
   protocolSettings.lowfanoutOrderOut = lowfanoutOrderOut;
   protocolSettings.loopAccommodation = loopAccommodation;
   protocolSettings.reconciliationMode = reconciliationMode;
+  protocolSettings.bhDetection = bhDetection;
   protocolSettings.reconciliationIntervalSeconds = reconciliationIntervalSeconds;
   protocolSettings.qEstimationMultiplier = qEstimationMultiplier;
 

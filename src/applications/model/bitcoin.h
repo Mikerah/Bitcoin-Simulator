@@ -59,7 +59,7 @@ enum ReconcilStrategy
 {
   RECON_OFF,           //DEFAULT
   TIME_BASED,
-  SET_SIZE_BASED,
+  SET_SIZE_BASED
 };
 
 
@@ -137,8 +137,10 @@ typedef struct {
 
 
   int reconciliationMode;
+  bool bhDetection;
   int reconciliationIntervalSeconds;
   double qEstimationMultiplier;
+
 } ProtocolSettings;
 
 #define FILTER_BASE_NUMBERING 1000

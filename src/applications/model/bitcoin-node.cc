@@ -376,6 +376,9 @@ BitcoinNode::ReconcileWithPeer(void) {
     Ipv4Address peer;
     if (m_protocolSettings.reconciliationMode == TIME_BASED) {
       peer = m_reconcilePeers.front();
+      if (m_protocolSettings.bhDetection && peersMode[peer] == BLACK_HOLE) {
+        peer = m_reconcilePeers.front();
+      }
       m_reconcilePeers.pop_front();
       m_reconcilePeers.push_back(peer);
     } else if (m_protocolSettings.reconciliationMode = SET_SIZE_BASED) {
@@ -686,6 +689,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 item.nodeId = m_nodeStats->nodeId;
                 m_nodeStats->reconcilData.push_back(item);
                 m_nodeStats->reconcils++;
+
+
                 // m_reconciliationHistory[peer] = totalDiff;
 
                 break;
