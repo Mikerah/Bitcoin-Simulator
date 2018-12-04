@@ -299,6 +299,8 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
     LogTime();
   }
 
+  AnnounceMode();
+
   if (m_mode == BLACK_HOLE)
     return;
 
@@ -310,7 +312,6 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
     int nextReconciliation = 10;
     Simulator::Schedule (Seconds(nextReconciliation), &BitcoinNode::ReconcileWithPeer, this);
   }
-  AnnounceMode();
 }
 
 
