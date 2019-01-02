@@ -514,6 +514,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   int activeNodes = totalNodes - blackHoles;
 
+  uint64_t totalMessages = 0;
+
+  totalMessages = invReceivedTotal + reconInvReceivedTotal + totalSyndromesSent + bisectionSyndromes + fallbackCost;
 
   std::cout << "INVs sent in the network: " << invReceivedTotal << std::endl;
   std::cout << "Useless % INVs in the network: " << uselessInvReceivedTotal * 1.0 / invReceivedTotal << std::endl;
@@ -533,6 +536,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << "Reconciliations failed public: " << reconFailedPublic << std::endl;
   std::cout << "Reconciliations failed private: " << reconFailedPrivate << std::endl;
   std::cout << "Reconciliations failed after 1 bisection: " << failAfterBisection << std::endl;
+
+  std::cout << "Total messages: " << totalMessages << std::endl;
 
   if (countSetSizesPublic != 0)
     std::cout << "Average set sizes public: " << setSizesPublic / countSetSizesPublic << std::endl;
