@@ -935,10 +935,11 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from) {
 void BitcoinNode::AddToReconciliationSets(int txId, Ipv4Address from) {
   if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
     return;
+
   // std::cout << "Node " << m_nodeStats->nodeId << " adds tx: " << txId << "from peer" << from << std::endl;
   for (std::vector<Ipv4Address>::const_iterator i = m_peersAddresses.begin(); i != m_peersAddresses.end(); ++i)
   {
-    if (*i == from) {
+    if (*i == from || peersMode[*i] == BLACK_HOLE) {
       continue;
     }
     m_peerReconciliationSets[*i].push_back(txId);
