@@ -784,6 +784,8 @@ void
 BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
 {
   NS_LOG_FUNCTION (this);
+  Ipv4Address peer = InetSocketAddress::ConvertFrom(from).GetIpv4();
+  
   rapidjson::Document reconcileData;
   reconcileData.SetObject();
 
