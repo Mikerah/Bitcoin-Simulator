@@ -139,7 +139,7 @@ protected:
 
   void SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber);
 
-  void RespondToReconciliationRequest();
+  void RespondToReconciliationRequest(Ipv4Address from);
 
   void RotateDandelionDestinations();
   /**
