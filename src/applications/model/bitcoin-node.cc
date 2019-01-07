@@ -598,33 +598,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case RECONCILE_TX_REQUEST:
             {
                 size_t set =  d["setSize"].GetInt();
-                rapidjson::Document reconcileData;
-                reconcileData.SetObject();
-
-                rapidjson::Value msg;
-                rapidjson::Value txArray(rapidjson::kArrayType);
-
-                rapidjson::Document::AllocatorType& allocator = reconcileData.GetAllocator();
-
-                msg = RECONCILE_TX_RESPONSE;
-                reconcileData.AddMember("message", msg, allocator);
-
-                for (int it: m_peerReconciliationSets[peer]) {
-                    rapidjson::Value txhash;
-                    txhash.SetInt(it);
-                    txArray.PushBack(txhash,allocator);
-                    peersKnowTx[it].push_back(peer);
-                }
-                reconcileData.AddMember("transactions", txArray, allocator);
-                rapidjson::StringBuffer reconcileInfo;
-                rapidjson::Writer<rapidjson::StringBuffer> reconcileWriter(reconcileInfo);
-                reconcileData.Accept(reconcileWriter);
-
-                const uint8_t delimiter[] = "#";
-                m_peersSockets[peer]->Send(reinterpret_cast<const uint8_t*>(reconcileInfo.GetString()), reconcileInfo.GetSize(), 0);
-                m_peersSockets[peer]->Send(delimiter, 1, 0);
-
-                m_peerReconciliationSets[peer].clear();
+                auto delay = PoissonNextSend(2);
+                Simulator::Schedule (Seconds(delay), &BitcoinNode::RespondToReconciliationRequest, this, peer);
                 break;
             }
             case RECONCILE_TX_RESPONSE:
@@ -804,6 +779,41 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
     }
 }
 
+
+void
+BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
+{
+  NS_LOG_FUNCTION (this);
+  rapidjson::Document reconcileData;
+  reconcileData.SetObject();
+
+  rapidjson::Value msg;
+  rapidjson::Value txArray(rapidjson::kArrayType);
+
+  rapidjson::Document::AllocatorType& allocator = reconcileData.GetAllocator();
+
+  msg = RECONCILE_TX_RESPONSE;
+  reconcileData.AddMember("message", msg, allocator);
+
+  for (int it: m_peerReconciliationSets[peer]) {
+      rapidjson::Value txhash;
+      txhash.SetInt(it);
+      txArray.PushBack(txhash,allocator);
+      peersKnowTx[it].push_back(peer);
+  }
+  reconcileData.AddMember("transactions", txArray, allocator);
+  rapidjson::StringBuffer reconcileInfo;
+  rapidjson::Writer<rapidjson::StringBuffer> reconcileWriter(reconcileInfo);
+  reconcileData.Accept(reconcileWriter);
+
+  const uint8_t delimiter[] = "#";
+  m_peersSockets[peer]->Send(reinterpret_cast<const uint8_t*>(reconcileInfo.GetString()), reconcileInfo.GetSize(), 0);
+  m_peersSockets[peer]->Send(delimiter, 1, 0);
+
+  m_peerReconciliationSets[peer].clear();
+}
+
+
 void
 BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int transactionHash, int hopNumber)
 {
@@ -927,8 +937,8 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from) {
   knownTxHashes.push_back(txId);
   m_nodeStats->txReceived++;
   if (m_protocolSettings.reconciliationMode != RECON_OFF) {
-    Simulator::Schedule (Seconds(3), &BitcoinNode::AddToReconciliationSets, this, txId, from);
-    // AddToReconciliationSets(txId, from);
+    // Simulator::Schedule (Seconds(3), &BitcoinNode::AddToReconciliationSets, this, txId, from);
+    AddToReconciliationSets(txId, from);
   }
 }
 
