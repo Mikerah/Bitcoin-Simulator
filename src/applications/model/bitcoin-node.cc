@@ -516,7 +516,7 @@ BitcoinNode::EmitTransaction (void)
 
   if (m_inPeers.size() > 0) {
     AdvertiseTransactionInvWrapper(myself, transactionId, 0);
-    std::cout << "Have in peers, flooding" << std::endl;
+    // std::cout << "Have in peers, flooding" << std::endl;
   }
   SaveTxData(transactionId, myself);
 }
