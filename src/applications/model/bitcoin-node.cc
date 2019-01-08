@@ -191,7 +191,7 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
           m_peerReconciliationSets.insert(std::pair<Ipv4Address,std::vector<int>>(peer, s));
           if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) != m_outPeers.end()) {
             m_reconcilePeers.push_back(peer);
-            m_reconciliationHistory[peer] = std::vector<int>(4, 0);
+            // m_reconciliationHistory[peer] = std::vector<int>(4, 0);
           }
       }
   }
@@ -698,11 +698,11 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     } else {
                       m_nodeStats->uselessInvReceivedMessages++;
                     }
-                    if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() &&
-                      m_protocolSettings.loopAccommodation == 1) {
-                      loopHistory.push_back(parsedInv);
-                      AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
-                    }
+                    // if (std::find(loopHistory.begin(), loopHistory.end(), parsedInv) == loopHistory.end() &&
+                    //   m_protocolSettings.loopAccommodation == 1) {
+                    //   loopHistory.push_back(parsedInv);
+                    //   AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
+                    // }
                     continue;
                 } else {
                   SaveTxData(parsedInv, peer);
@@ -766,7 +766,7 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
         case PREFERRED_ALL_DESTINATIONS:
         {
              AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
-                          AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers, m_protocolSettings.lowfanoutOrderInPercent);
+             AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers, m_protocolSettings.lowfanoutOrderInPercent);
 			       // AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers,
              //   floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
              break;
