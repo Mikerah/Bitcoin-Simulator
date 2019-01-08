@@ -212,7 +212,7 @@ main (int argc, char *argv[])
 
       auto outPeers = bitcoinTopologyHelper.GetPeersOutConnections(node.first);
       auto mode = REGULAR;
-      if (node.first > publicIPNodes && node.first < TX_EMITTERS + publicIPNodes) {
+      if (node.first > publicIPNodes + 10 && node.first < TX_EMITTERS + publicIPNodes + 10) {
         mode = TX_EMITTER;
       }
       else if (node.first < blackHoles) {
