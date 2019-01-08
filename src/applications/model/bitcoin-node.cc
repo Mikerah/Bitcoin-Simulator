@@ -766,8 +766,9 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
         case PREFERRED_ALL_DESTINATIONS:
         {
              AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
-			       AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers,
-               floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
+                          AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers, m_protocolSettings.lowfanoutOrderInPercent);
+			       // AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers,
+             //   floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
              break;
         }
         case DANDELION_MAPPING:
@@ -785,7 +786,7 @@ BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
 {
   NS_LOG_FUNCTION (this);
   Ipv4Address peer = InetSocketAddress::ConvertFrom(from).GetIpv4();
-  
+
   rapidjson::Document reconcileData;
   reconcileData.SetObject();
 
