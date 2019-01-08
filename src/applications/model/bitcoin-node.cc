@@ -943,8 +943,7 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from) {
   knownTxHashes.push_back(txId);
   m_nodeStats->txReceived++;
   if (m_protocolSettings.reconciliationMode != RECON_OFF) {
-    Simulator::Schedule (Seconds(3), &BitcoinNode::AddToReconciliationSets, this, txId, from);
-    // AddToReconciliationSets(txId, from);
+    AddToReconciliationSets(txId, from);
   }
 }
 
