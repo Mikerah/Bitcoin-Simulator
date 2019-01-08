@@ -324,26 +324,26 @@ void BitcoinNode::LogTime() {
 }
 
 void BitcoinNode::RotateDandelionDestinations() {
-  for (auto peer: m_peersAddresses){
-    m_dandelionDestinations[peer].clear();
-    std::vector<Ipv4Address> outPeersCopy(m_outPeers);
-    for (int i = 0; i < m_protocolSettings.lowfanoutOrderOut; i++) {
-      auto peer = ChooseFromPeers(outPeersCopy);
-      m_dandelionDestinations[peer].push_back(peer);
-      outPeersCopy.erase(std::find(outPeersCopy.begin(), outPeersCopy.end(), peer));
-    }
-
-    std::vector<Ipv4Address> inPeersCopy(m_inPeers);
-    for (int i = 0; i < m_protocolSettings.lowfanoutOrderInPercent * m_inPeers.size(); i++) {
-      auto peer = ChooseFromPeers(inPeersCopy);
-      m_dandelionDestinations[peer].push_back(peer);
-      inPeersCopy.erase(std::find(inPeersCopy.begin(), inPeersCopy.end(), peer));
-    }
-  }
-
-  if (m_timeToRun < Simulator::Now().GetSeconds()) {
-    return;
-  }
+  // for (auto peer: m_peersAddresses){
+  //   m_dandelionDestinations[peer].clear();
+  //   std::vector<Ipv4Address> outPeersCopy(m_outPeers);
+  //   for (int i = 0; i < m_protocolSettings.lowfanoutOrderOut; i++) {
+  //     auto peer = ChooseFromPeers(outPeersCopy);
+  //     m_dandelionDestinations[peer].push_back(peer);
+  //     outPeersCopy.erase(std::find(outPeersCopy.begin(), outPeersCopy.end(), peer));
+  //   }
+  //
+  //   std::vector<Ipv4Address> inPeersCopy(m_inPeers);
+  //   for (int i = 0; i < m_protocolSettings.lowfanoutOrderInPercent * m_inPeers.size(); i++) {
+  //     auto peer = ChooseFromPeers(inPeersCopy);
+  //     m_dandelionDestinations[peer].push_back(peer);
+  //     inPeersCopy.erase(std::find(inPeersCopy.begin(), inPeersCopy.end(), peer));
+  //   }
+  // }
+  //
+  // if (m_timeToRun < Simulator::Now().GetSeconds()) {
+  //   return;
+  // }
   Simulator::Schedule (Seconds(DANDELION_ROTATION_SECONDS), &BitcoinNode::RotateDandelionDestinations, this);
 }
 
@@ -773,8 +773,8 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
         }
         case DANDELION_MAPPING:
         {
-            AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_dandelionDestinations[ipv4From],
-               m_dandelionDestinations[ipv4From].size());
+            // AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_dandelionDestinations[ipv4From],
+            //    m_dandelionDestinations[ipv4From].size());
              break;
         }
     }
