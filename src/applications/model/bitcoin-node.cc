@@ -514,7 +514,8 @@ BitcoinNode::EmitTransaction (void)
   auto myself = InetSocketAddress::ConvertFrom(m_local).GetIpv4();
   NS_LOG_INFO("F");
 
-  AdvertiseTransactionInvWrapper(myself, transactionId, 0);
+  if (m_inPeers.size() > 0)
+    AdvertiseTransactionInvWrapper(myself, transactionId, 0);
   SaveTxData(transactionId, myself);
 }
 
