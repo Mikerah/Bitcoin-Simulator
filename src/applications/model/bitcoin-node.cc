@@ -840,7 +840,7 @@ void
 BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int peersToRelayTo)
 {
     NS_LOG_FUNCTION (this);
-    if (peers.size() == 0)
+    if (peers.size() < peersToRelayTo)
       return;
     // does not stuck in endless loop
     int tries = peers.size();
