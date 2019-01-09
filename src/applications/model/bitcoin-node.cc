@@ -601,7 +601,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case RECONCILE_TX_REQUEST:
             {
                 size_t set =  d["setSize"].GetInt();
-                auto delay = PoissonNextSend(2);
+                auto delay = PoissonNextSend(3);
                 Simulator::Schedule (Seconds(delay), &BitcoinNode::RespondToReconciliationRequest, this, peer);
                 break;
             }
