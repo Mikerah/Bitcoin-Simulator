@@ -251,7 +251,7 @@ protected:
 
 
   // every 30 seconds
-  const std::vector<double> transactionRates = {2.66, 2.033, 14, 14, 3.6, 2.45, 2.067, 9, 2.067};
+  const std::vector<double> transactionRates = {9, 2.66, 7, 2.033, 14, 14, 3.6, 2.45, 2.067, 9, 2.067};
 
 };
 
