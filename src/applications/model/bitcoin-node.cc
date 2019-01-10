@@ -181,7 +181,7 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
   for (auto peer: m_peersAddresses) {
     if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) == m_outPeers.end())
       m_inPeers.push_back(peer);
-    m_prevA_per_peer[peer] = A_ESTIMATOR
+    m_prevA_per_peer[peer] = A_ESTIMATOR;
   }
 
   if (m_protocolSettings.reconciliationMode != RECON_OFF)
