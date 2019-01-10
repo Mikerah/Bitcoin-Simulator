@@ -199,6 +199,9 @@ protected:
 
   double m_prevA;
 
+  std::map<std::vector<Ipv4Address>, double>     m_prevA_per_peer;
+
+
   std::map<int, std::vector<Ipv4Address>>     peersKnowTx;
 
   std::map<Ipv4Address, std::vector<int>>     m_peerReconciliationSets;         //!< Set of all txs we've seen, to be reconciled with peers

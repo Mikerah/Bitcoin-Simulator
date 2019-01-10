@@ -181,6 +181,7 @@ BitcoinNode::SetProperties (uint64_t timeToRun, enum ModeType mode,
   for (auto peer: m_peersAddresses) {
     if (std::find(m_outPeers.begin(), m_outPeers.end(), peer) == m_outPeers.end())
       m_inPeers.push_back(peer);
+    m_prevA_per_peer[peer] = A_ESTIMATOR
   }
 
   if (m_protocolSettings.reconciliationMode != RECON_OFF)
@@ -657,9 +658,12 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 
                 int mySetSize = peerSet.size();
                 int hisSetSize = d["transactions"].Size();
+                m_prevA = m_prevA_per_peer[peer];
                 int estimatedDiff = EstimateDifference(mySetSize, hisSetSize, m_prevA) + m_protocolSettings.qEstimationMultiplier;
-                if (mySetSize * hisSetSize != 0 && estimatedDiff >= mySetSize + hisSetSize)
+                if (mySetSize * hisSetSize != 0 && estimatedDiff >= mySetSize + hisSetSize) {
                   m_prevA = (totalDiff-std::abs(mySetSize - hisSetSize)) / std::min(mySetSize, hisSetSize);
+                  m_prevA_per_peer[peer] = m_prevA
+                }
 
                 reconcilItem item;
                 item.setInSize = d["transactions"].Size();
