@@ -199,7 +199,7 @@ protected:
 
   double m_prevA;
 
-  std::map<std::vector<Ipv4Address>, double>     m_prevA_per_peer;
+  std::map<Ipv4Address, double>     m_prevA_per_peer;
 
 
   std::map<int, std::vector<Ipv4Address>>     peersKnowTx;
