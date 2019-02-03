@@ -1,3 +1,41 @@
+# Intro
+
+Our simulation was done via ns3. We forked open-source Bitcoin Simulator to support transaction relay (it was used to measure block relay and focused on mining). We emulated a network, similar to the current Bitcoin network.
+We have 2 phases in our simulation:
+  - Bootstrapping the network
+  - Transaction generation and relay
+Our simulation is based on:
+  - INV-GETDATA transaction relay protocol
+  - Current ratio of public-IP nodes to private-IP nodes in the Bitcoin network
+  - Different ratios of faults in the network is simulated by introducing Black Hole nodes (nodes which receive messages, but do not propagate transactions further)
+
+Although replication of the Bitcoin network topology would the most fair experiments, it has been shown that inferring the Bitcoin network topology is not trivial.
+
+The topology of simulated network is random, but at the same time similar to the actual Bitcoin network because of the same 2 phases of bootstrapping:
+  - Public-IP nodes connect to each other having a limit of 8 outgoing connections
+  - Private-IP nodes connect to 8 existing public-IP nodes
+
+Our simulation does not take into account:
+  - Resource-wise heterogeneous setting (see Section 2.4)
+  - Block relay phase
+  - Joining and leaving nodes during the transaction relay phase
+  - Sophisticated malicious nodes
+
+
+
+# How to run this version
+
+./waf  --run "default-test --nodes=30000 --publicIPNodes=3000 --minConnections=16 --maxConnections=800 --simulTime=150 --protocol=4 --reconciliationMode=1 --invIntervalSeconds=1 --lowfanoutOrderInPercent=0 --lowfanoutOrderOut=8  --reconciliationIntervalSeconds=1 --qEstimationMultiplier=1 --bisectionRate=1 --blackHoles=0"
+
+lowfanoutOrderInPercent: in percent of incoming peers
+lowfanoutOrderOut: in outgoing peers
+
+For multi-core prepend with
+```mpirun -n 8```
+
+
+For installation see next paragraph
+
 # Bitcoin-Simulator, capable of simulating any re-parametrization of Bitcoin
 Bitcoin Simulator is built on ns3, the popular discrete-event simulator. We also made use of rapidjson to facilitate the communication process among the nodes. The purpose of this project is to study how consensus parameteres, network characteristics and protocol modifications affect the scalability, security and efficiency of Proof of Work powered blockchains.
 
@@ -7,7 +45,7 @@ We provide you with a detailed [installation guide](http://arthurgervais.github.
 
 # Crafted through Research
 
-The Bitcoin-Simulator was developed as part of the following publication in CCS'16: 
+The Bitcoin-Simulator was developed as part of the following publication in CCS'16:
 
 [On the Security and Performance of Proof of Work Blockchains](https://eprint.iacr.org/2016/555.pdf)
 
