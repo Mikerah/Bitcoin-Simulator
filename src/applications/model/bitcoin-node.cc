@@ -511,9 +511,7 @@ BitcoinNode::EmitTransaction (void)
   m_nodeStats->txCreated++;
 
   int transactionId = nodeId*1000000 + m_nodeStats->txCreated;
-  NS_LOG_INFO("E");
   auto myself = InetSocketAddress::ConvertFrom(m_local).GetIpv4();
-  NS_LOG_INFO("F");
 
   if (m_inPeers.size() > 0) {
     AdvertiseTransactionInvWrapper(myself, transactionId, 0);
@@ -602,7 +600,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case RECONCILE_TX_REQUEST:
             {
                 size_t set =  d["setSize"].GetInt();
-                auto delay = PoissonNextSend(3);
+                auto delay = PoissonNextSend(1) + 2;
                 Simulator::Schedule (Seconds(delay), &BitcoinNode::RespondToReconciliationRequest, this, peer);
                 break;
             }
@@ -673,10 +671,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 item.nodeId = m_nodeStats->nodeId;
                 m_nodeStats->reconcilData.push_back(item);
                 m_nodeStats->reconcils++;
-
-
                 // m_reconciliationHistory[peer] = totalDiff;
-
                 break;
             }
             case INV:
@@ -729,11 +724,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
         /**
         * Buffer the remaining data
         */
-        NS_LOG_INFO("741");
         m_bufferedData[from] = totalReceivedData;
-        NS_LOG_INFO("743");
         delete[] packetInfo;
-        NS_LOG_INFO("745");
       }
       else if (Inet6SocketAddress::IsMatchingType (from))
       {
@@ -743,20 +735,16 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                      << Inet6SocketAddress::ConvertFrom(from).GetIpv6 ()
                      << " port " << Inet6SocketAddress::ConvertFrom (from).GetPort ());
       }
-      NS_LOG_INFO("755");
       m_rxTrace (packet, from);
-      NS_LOG_INFO("757");
   }
 }
 
 void
 BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber)
 {
-    NS_LOG_INFO("A");
     Ipv4Address ipv4From;
     if (hopNumber != 0)
       ipv4From = InetSocketAddress::ConvertFrom(from).GetIpv4();
-    NS_LOG_INFO("B");
 
     switch(m_protocolSettings.protocol)
     {
@@ -922,9 +910,7 @@ BitcoinNode::SendMessage(enum Messages receivedMessage,  enum Messages responseM
   d["message"].SetInt(responseMessage);
   d.Accept(writer);
 
-  NS_LOG_INFO("C");
   Ipv4Address outgoingIpv4Address = InetSocketAddress::ConvertFrom(outgoingAddress).GetIpv4 ();
-  NS_LOG_INFO("D");
   std::map<Ipv4Address, Ptr<Socket>>::iterator it = m_peersSockets.find(outgoingIpv4Address);
 
   if (it == m_peersSockets.end()) //Create the socket if it doesn't exist
