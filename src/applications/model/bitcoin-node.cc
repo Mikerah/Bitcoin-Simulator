@@ -517,7 +517,7 @@ BitcoinNode::EmitTransaction (void)
     AdvertiseTransactionInvWrapper(myself, transactionId, 0);
     // std::cout << "Have in peers, flooding" << std::endl;
   }
-  SaveTxData(transactionId, myself);
+  SaveTxData(transactionId, myself, 0);
 }
 
 
@@ -624,7 +624,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                       }
                     }
                     iMissCounter++;
-                    SaveTxData(txId, peer);
+                    SaveTxData(txId, peer, RECON_HOP);
                     // AdvertiseTransactionInvWrapper(peer, txId, 0);
                 }
                 int heMissCounter = 0;
@@ -707,7 +707,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     // }
                     continue;
                 } else {
-                  SaveTxData(parsedInv, peer);
+                  SaveTxData(parsedInv, peer, hopNumber);
                   AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
                 }
               }
@@ -923,12 +923,13 @@ BitcoinNode::SendMessage(enum Messages receivedMessage,  enum Messages responseM
   m_peersSockets[outgoingIpv4Address]->Send (delimiter, 1, 0);
 }
 
-void BitcoinNode::SaveTxData(int txId, Ipv4Address from) {
+void BitcoinNode::SaveTxData(int txId, Ipv4Address from, int hopNumber) {
   assert(std::find(knownTxHashes.begin(), knownTxHashes.end(), txId) == knownTxHashes.end());
   txRecvTime txTime;
   txTime.nodeId = GetNode()->GetId();
   txTime.txHash = txId;
   txTime.txTime = Simulator::Now().GetSeconds();
+  txTime.hopNumber = hopNumber;
   m_nodeStats->txReceivedTimes.push_back(txTime);
   knownTxHashes.push_back(txId);
   m_nodeStats->txReceived++;

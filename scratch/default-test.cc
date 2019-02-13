@@ -102,6 +102,8 @@ main (int argc, char *argv[])
 
   bool bhDetection = false;
 
+  int publicSpies = 0;
+
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
   cmd.AddValue ("minConnections", "The minConnectionsPerNode of the grid", minConnectionsPerNode);
@@ -109,6 +111,7 @@ main (int argc, char *argv[])
 
   cmd.AddValue ("simulTime", "Simulation time", simulTime);
   cmd.AddValue ("publicIPNodes", "How many nodes has public IP", publicIPNodes);
+  cmd.AddValue ("publicSpies", "public spy nodes", publicSpies);
 
   cmd.AddValue ("protocol", "Used protocol: 0 — Default, 1 — Filters on links", protocol);
   cmd.AddValue ("reconciliationMode", "reconciliation mode: 0 — Off, 1 — Time-based, 2 — Set size based", reconciliationMode);
@@ -212,12 +215,15 @@ main (int argc, char *argv[])
 
       auto outPeers = bitcoinTopologyHelper.GetPeersOutConnections(node.first);
       auto mode = REGULAR;
+
       if (node.first > publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100) {
       // if (node.first < TX_EMITTERS) {
         mode = TX_EMITTER;
       }
       else if (node.first < blackHoles) {
         mode = BLACK_HOLE;
+      } else if (node.first < blackHoles + publicSpies) {
+        mode = SPY;
       }
 
       bitcoinNodeHelper.SetProperties(simulTime, mode, systemId, outPeers);
@@ -403,6 +409,10 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliationsFailed = 0;
   long totalReconciliations = 0;
 
+
+  std::set<int> sourceIdentifiedBySpiesFlood;
+  std::set<int> sourceIdentifiedBySpiesRecon;
+
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
   long fallbackCost = 0;
@@ -503,8 +513,21 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     {
       txRecvTime txTime = stats[it].txReceivedTimes[txCount];
       allTxRelayTimes[txTime.txHash].push_back(txTime.txTime);
+      if (stats[it].mode == SPY) {
+        if (txTime.hopNumber == 0)
+          sourceIdentifiedBySpiesFlood.insert(txTime.hash);
+        if (txTime.hopNumber == 999)
+          sourceIdentifiedBySpiesRecon.insert(txTime.hash);
+      }
     }
   }
+
+  std::cout << "Tx sources identified by public spies (flooding): " << sourceIdentifiedBySpiesFlood.size() << std::endl;
+  std::cout << "Tx sources identified by public spies (recon): " << sourceIdentifiedBySpiesRecon.size() << std::endl;
+  for (auto a: ratiosA) {
+    std::cout << a << ", ";
+  }
+
 
   std::cout << "Distribution of ratios A" << std::endl;
   for (auto a: ratiosA) {
@@ -652,16 +675,17 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
   int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper)
 {
 #ifdef MPI_TEST
-  int            blocklen[3] = {1, 1, 1};
-  MPI_Aint       disp[3];
-  MPI_Datatype   dtypes[3] = {MPI_INT, MPI_INT, MPI_DOUBLE};
+  int            blocklen[4] = {1, 1, 1, 1};
+  MPI_Aint       disp[4];
+  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT};
   MPI_Datatype   mpi_txRecvTime;
 
   disp[0] = offsetof(txRecvTime, nodeId);
   disp[1] = offsetof(txRecvTime, txHash);
   disp[2] = offsetof(txRecvTime, txTime);
+  disp[3] = offsetof(txRecvTime, hopNumber);
 
-  MPI_Type_create_struct (3, blocklen, disp, dtypes, &mpi_txRecvTime);
+  MPI_Type_create_struct (4, blocklen, disp, dtypes, &mpi_txRecvTime);
   MPI_Type_commit (&mpi_txRecvTime);
 
   if (systemId != 0 && systemCount > 1)

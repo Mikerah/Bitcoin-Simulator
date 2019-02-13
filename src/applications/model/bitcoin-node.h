@@ -129,7 +129,7 @@ protected:
   void ScheduleNextTransactionEvent(void);
   void EmitTransaction(void);
 
-  void SaveTxData(int txId, Ipv4Address from);
+  void SaveTxData(int txId, Ipv4Address from, int hopNumber);
   void AddToReconciliationSets(int txId, Ipv4Address from);
   void RemoveFromReconciliationSets(int txId, Ipv4Address peer);
 

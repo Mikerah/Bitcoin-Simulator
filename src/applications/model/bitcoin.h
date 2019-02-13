@@ -75,6 +75,7 @@ typedef struct {
   int nodeId;
   int txHash;
   double txTime;
+  int hopNumber;
 } txRecvTime;
 
 typedef struct {
