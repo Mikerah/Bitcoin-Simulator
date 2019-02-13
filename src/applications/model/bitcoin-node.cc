@@ -513,7 +513,7 @@ BitcoinNode::EmitTransaction (void)
   int transactionId = nodeId*1000000 + m_nodeStats->txCreated;
   auto myself = InetSocketAddress::ConvertFrom(m_local).GetIpv4();
 
-  if (m_inPeers.size() > 0) {
+  if (m_protocolSettings.protocol == STANDARD_PROTOCOL || m_inPeers.size() > 0) {
     AdvertiseTransactionInvWrapper(myself, transactionId, 0);
     // std::cout << "Have in peers, flooding" << std::endl;
   }
