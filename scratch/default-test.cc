@@ -517,9 +517,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       allTxRelayTimes[txTime.txHash].push_back(txTime.txTime);
       if (stats[it].mode == SPY) {
         if (sourceIdentifiedBySpies.count(txTime.txHash) == 0)
-          sourceIdentifiedBySpies[txTime.txHash] = txRecvTime;
+          sourceIdentifiedBySpies[txTime.txHash] = txTime;
         else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
-          sourceIdentifiedBySpies[txTime.txHash] = txRecvTime;
+          sourceIdentifiedBySpies[txTime.txHash] = txTime;
         // if (txTime.hopNumber == 999)
         //   sourceIdentifiedBySpiesRecon.insert(txTime.txHash); 
       }
