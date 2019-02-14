@@ -410,7 +410,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliations = 0;
 
 
-  std::map<int, int> sourceIdentifiedBySpies;
+  std::map<int, txRecvTime> sourceIdentifiedBySpies;
 
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
