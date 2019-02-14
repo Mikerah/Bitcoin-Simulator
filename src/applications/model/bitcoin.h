@@ -21,7 +21,7 @@ const int SUB_SETS = 4;
 
 
 
-const int TX_EMITTERS = 1000;
+const int TX_EMITTERS = 5000;
 
 const int RECON_MAX_SET_SIZE = 1600;
 

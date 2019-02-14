@@ -410,8 +410,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliations = 0;
 
 
-  std::set<int> sourceIdentifiedBySpiesFlood;
-  std::set<int> sourceIdentifiedBySpiesRecon;
+  std::map<int, int> sourceIdentifiedBySpies;
 
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
@@ -427,6 +426,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long overestimationPublic = 0;
   int reconFailedPublic = 0;
   int reconFailedPrivate = 0;
+
+  long learnedFromPublic = 0;
+  long learnedFromPrivate = 0;
 
   long totalOnTheFlyCollisions = 0;
 
@@ -514,16 +516,29 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       txRecvTime txTime = stats[it].txReceivedTimes[txCount];
       allTxRelayTimes[txTime.txHash].push_back(txTime.txTime);
       if (stats[it].mode == SPY) {
-        if (txTime.hopNumber == 0)
-          sourceIdentifiedBySpiesFlood.insert(txTime.txHash);
-        if (txTime.hopNumber == 999)
-          sourceIdentifiedBySpiesRecon.insert(txTime.txHash);
+        if (sourceIdentifiedBySpies.count(txTime.txHash) == 0)
+          sourceIdentifiedBySpies[txTime.txHash] = txRecvTime;
+        else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
+          sourceIdentifiedBySpies[txTime.txHash] = txRecvTime;
+        // if (txTime.hopNumber == 999)
+        //   sourceIdentifiedBySpiesRecon.insert(txTime.txHash); 
       }
+
     }
   }
 
-  std::cout << "Tx sources identified by public spies (flooding): " << sourceIdentifiedBySpiesFlood.size() << std::endl;
-  std::cout << "Tx sources identified by public spies (recon): " << sourceIdentifiedBySpiesRecon.size() << std::endl;
+  int successSpying = 0;
+  int failSpying = 0;
+  for (auto el: sourceIdentifiedBySpies) {
+    auto txTime = el.second;
+    if (txTime.hopNumber == 0 || txTime.hopNumber == 999)
+      successSpying++;
+    else
+      failSpying++;
+  }
+
+  std::cout << "Tx sources identified by public spies: " << successSpying << std::endl;
+  std::cout << "Tx sources NOT identified by public spies: " << failSpying << std::endl;
   for (auto a: ratiosA) {
     std::cout << a << ", ";
   }
