@@ -103,6 +103,7 @@ main (int argc, char *argv[])
   bool bhDetection = false;
 
   int publicSpies = 0;
+  int privateSpies = 0;
 
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
@@ -112,6 +113,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("simulTime", "Simulation time", simulTime);
   cmd.AddValue ("publicIPNodes", "How many nodes has public IP", publicIPNodes);
   cmd.AddValue ("publicSpies", "public spy nodes", publicSpies);
+  cmd.AddValue ("privateSpies", "private spy nodes", privateSpies);
 
   cmd.AddValue ("protocol", "Used protocol: 0 — Default, 1 — Filters on links", protocol);
   cmd.AddValue ("reconciliationMode", "reconciliation mode: 0 — Off, 1 — Time-based, 2 — Set size based", reconciliationMode);
@@ -219,6 +221,9 @@ main (int argc, char *argv[])
       if (node.first > publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100) {
       // if (node.first < TX_EMITTERS) {
         mode = TX_EMITTER;
+      }
+      else if (node.first >= TX_EMITTERS + publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100 + privateSpies) {
+        mode = SPY;
       }
       else if (node.first < blackHoles) {
         mode = BLACK_HOLE;
