@@ -103,10 +103,7 @@ main (int argc, char *argv[])
   bool bhDetection = false;
 
   int publicSpies = 0;
-<<<<<<< HEAD
-=======
   int privateSpies = 0;
->>>>>>> estimate_historically
 
   CommandLine cmd;
   cmd.AddValue ("nodes", "The total number of nodes in the network", totalNoNodes);
@@ -116,10 +113,7 @@ main (int argc, char *argv[])
   cmd.AddValue ("simulTime", "Simulation time", simulTime);
   cmd.AddValue ("publicIPNodes", "How many nodes has public IP", publicIPNodes);
   cmd.AddValue ("publicSpies", "public spy nodes", publicSpies);
-<<<<<<< HEAD
-=======
   cmd.AddValue ("privateSpies", "private spy nodes", privateSpies);
->>>>>>> estimate_historically
 
   cmd.AddValue ("protocol", "Used protocol: 0 — Default, 1 — Filters on links", protocol);
   cmd.AddValue ("reconciliationMode", "reconciliation mode: 0 — Off, 1 — Time-based, 2 — Set size based", reconciliationMode);
@@ -228,12 +222,9 @@ main (int argc, char *argv[])
       // if (node.first < TX_EMITTERS) {
         mode = TX_EMITTER;
       }
-<<<<<<< HEAD
-=======
       else if (node.first >= TX_EMITTERS + publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100 + privateSpies) {
         mode = SPY;
       }
->>>>>>> estimate_historically
       else if (node.first < blackHoles) {
         mode = BLACK_HOLE;
       } else if (node.first < blackHoles + publicSpies) {
@@ -424,12 +415,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   long totalReconciliations = 0;
 
 
-<<<<<<< HEAD
   std::map<int, txRecvTime> sourceIdentifiedBySpies;
-=======
-  std::set<int> sourceIdentifiedBySpiesFlood;
-  std::set<int> sourceIdentifiedBySpiesRecon;
->>>>>>> estimate_historically
 
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
@@ -446,12 +432,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   int reconFailedPublic = 0;
   int reconFailedPrivate = 0;
 
-<<<<<<< HEAD
   long learnedFromPublic = 0;
   long learnedFromPrivate = 0;
 
-=======
->>>>>>> estimate_historically
   long totalOnTheFlyCollisions = 0;
 
   std::vector<int> ratiosA(100, 0);
@@ -538,7 +521,6 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
       txRecvTime txTime = stats[it].txReceivedTimes[txCount];
       allTxRelayTimes[txTime.txHash].push_back(txTime.txTime);
       if (stats[it].mode == SPY) {
-<<<<<<< HEAD
         if (sourceIdentifiedBySpies.count(txTime.txHash) == 0)
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
         else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
@@ -562,18 +544,6 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   std::cout << "Tx sources identified by public spies: " << successSpying << std::endl;
   std::cout << "Tx sources NOT identified by public spies: " << failSpying << std::endl;
-=======
-        if (txTime.hopNumber == 0)
-          sourceIdentifiedBySpiesFlood.insert(txTime.txHash);
-        if (txTime.hopNumber == 999)
-          sourceIdentifiedBySpiesRecon.insert(txTime.txHash);
-      }
-    }
-  }
-
-  std::cout << "Tx sources identified by public spies (flooding): " << sourceIdentifiedBySpiesFlood.size() << std::endl;
-  std::cout << "Tx sources identified by public spies (recon): " << sourceIdentifiedBySpiesRecon.size() << std::endl;
->>>>>>> estimate_historically
   for (auto a: ratiosA) {
     std::cout << a << ", ";
   }
