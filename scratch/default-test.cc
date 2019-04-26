@@ -218,19 +218,35 @@ main (int argc, char *argv[])
       auto outPeers = bitcoinTopologyHelper.GetPeersOutConnections(node.first);
       auto mode = REGULAR;
 
-      if (node.first > publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100) {
-      // if (node.first < TX_EMITTERS) {
-        mode = TX_EMITTER;
-      }
-      else if (node.first >= TX_EMITTERS + publicIPNodes + 100 && node.first < TX_EMITTERS + publicIPNodes + 100 + privateSpies) {
-        mode = SPY;
-      }
-      else if (node.first < blackHoles) {
-        mode = BLACK_HOLE;
-      } else if (node.first < blackHoles + publicSpies) {
-        mode = SPY;
+
+      // Public nodes come first, then private
+
+      assert (publicSpies == 0 || privateSpies == 0);
+
+      if (publicSpies != 0) {
+        if (node.first > blackHoles && node.first < blackHoles + publicSpies) {
+          mode = SPY;
+        }
+        // emitters are private nodes
+        if (node.first > publicIPNodes && node.first < TX_EMITTERS + publicIPNodes) {
+          mode = TX_EMITTER
+        }
       }
 
+      if (privateSpies != 0) {
+        if (node.first > publicIPNodes && node.first < publicIPNodes + privateSpies) {
+          mode = SPY;
+        }
+        // emitters are public nodes
+        if (node.first > blackHoles && node.first < publicIPNodes) {
+          mode = TX_EMITTER;
+        }
+      }
+
+      if (node.first < blackHoles) {
+        mode = BLACK_HOLE;
+      }
+  
       bitcoinNodeHelper.SetProperties(simulTime, mode, systemId, outPeers);
   	  bitcoinNodeHelper.SetNodeStats (&stats[node.first]);
       bitcoinNodes.Add(bitcoinNodeHelper.Install (targetNode));
