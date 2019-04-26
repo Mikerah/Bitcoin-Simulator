@@ -229,7 +229,7 @@ main (int argc, char *argv[])
         }
         // emitters are private nodes
         if (node.first > publicIPNodes && node.first < TX_EMITTERS + publicIPNodes) {
-          mode = TX_EMITTER
+          mode = TX_EMITTER;
         }
       }
 
