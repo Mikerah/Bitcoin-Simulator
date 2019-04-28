@@ -238,7 +238,8 @@ main (int argc, char *argv[])
           mode = SPY;
         }
         // emitters are public nodes
-        if (node.first > blackHoles && node.first < publicIPNodes) {
+        assert(TX_EMITTERS < publicIPNodes);
+        if (node.first > blackHoles && node.first < TX_EMITTERS) {
           mode = TX_EMITTER;
         }
       }
