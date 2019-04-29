@@ -609,12 +609,18 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int mySubSetSize[SUB_SETS] = {0};
                 int hisSubSetSize[SUB_SETS] = {0};
                 int i = 0;
+                std::vector<int> hops;
+                for (rapidjson::Value::ConstValueIterator itr = d["hops"].Begin(); itr != d["hops"].End(); ++itr) {
+                    hops[i] = itr->GetInt();
+                    i++;
+                }
+                i = 0;
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
                     hisSubSetSize[MurmurHash3Mixer(txId) % SUB_SETS]++;
                     peersKnowTx[txId].push_back(peer);
                     nodeBtransactions.insert(txId);
-                    int txHop = d["hops"][i];
+                    int txHop = hops[i];
                     i++;
                     if (std::find(peerSet.begin(), peerSet.end(), txId) != peerSet.end()) {
                       continue;
