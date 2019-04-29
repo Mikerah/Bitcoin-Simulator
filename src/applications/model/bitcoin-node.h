@@ -133,7 +133,7 @@ protected:
   void AddToReconciliationSets(int txId, Ipv4Address from);
   void RemoveFromReconciliationSets(int txId, Ipv4Address peer);
 
-  void AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber);
+  void AdvertiseTransactionInvWrapper (Address from, const int transactionHash);
   void AdvertiseNewTransactionInvStandard (Ipv4Address from, const int transactionHash);
   void AdvertiseNewTransactionInv (Ipv4Address from, const int transactionHash, std::vector<Ipv4Address> peers, int order);
 
