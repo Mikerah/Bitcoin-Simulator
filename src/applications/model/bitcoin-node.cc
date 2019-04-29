@@ -750,7 +750,7 @@ void
 BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash)
 {
     Ipv4Address ipv4From;
-    if (hopNumber != 0)
+    if (from != InetSocketAddress::ConvertFrom(m_local).GetIpv4())
       ipv4From = InetSocketAddress::ConvertFrom(from).GetIpv4();
 
     switch(m_protocolSettings.protocol)
