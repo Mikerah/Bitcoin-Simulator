@@ -511,7 +511,7 @@ BitcoinNode::EmitTransaction (void)
   auto myself = InetSocketAddress::ConvertFrom(m_local).GetIpv4();
 
   if (m_protocolSettings.protocol == STANDARD_PROTOCOL || m_inPeers.size() > 0) {
-    AdvertiseTransactionInvWrapper(myself, transactionId, 0);
+    AdvertiseTransactionInvWrapper(myself, transactionId);
     // std::cout << "Have in peers, flooding" << std::endl;
   }
   SaveTxData(transactionId, myself, 0);
@@ -643,7 +643,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                         // Do not inv to out peer, it will learn it later ???
                         // Due to assymetry in the network
                         // m_peerReconciliationSets[peer].push_back(it);
-                        Simulator::Schedule (Seconds(0.1), &BitcoinNode::SendInvToNode, this, peer, it, firstTimeHops[it], true);
+                        Simulator::Schedule (Seconds(0.1), &BitcoinNode::SendInvToNode, this, peer, it, firstTimeHops[it] + 1, true);
                         heMissCounter++;
                     }
                 }
@@ -715,7 +715,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                     continue;
                 } else {
                   SaveTxData(parsedInv, peer, hopNumber);
-                  AdvertiseTransactionInvWrapper(from, parsedInv, hopNumber + 1);
+                  AdvertiseTransactionInvWrapper(from, parsedInv);
                 }
               }
               break;
@@ -747,7 +747,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 }
 
 void
-BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber)
+BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transactionHash)
 {
     Ipv4Address ipv4From;
     if (hopNumber != 0)
@@ -757,18 +757,18 @@ BitcoinNode::AdvertiseTransactionInvWrapper (Address from, const int transaction
     {
         case STANDARD_PROTOCOL:
         {
-            AdvertiseNewTransactionInvStandard(ipv4From, transactionHash, hopNumber);
+            AdvertiseNewTransactionInvStandard(ipv4From, transactionHash);
             break;
         }
         case PREFERRED_OUT_DESTINATIONS:
         {
-			       AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
+			       AdvertiseNewTransactionInv(ipv4From, transactionHash, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
              break;
         }
         case PREFERRED_ALL_DESTINATIONS:
         {
-             AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
-             AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers, m_protocolSettings.lowfanoutOrderInPercent);
+             AdvertiseNewTransactionInv(ipv4From, transactionHash, m_outPeers, m_protocolSettings.lowfanoutOrderOut);
+             AdvertiseNewTransactionInv(ipv4From, transactionHash, m_inPeers, m_protocolSettings.lowfanoutOrderInPercent);
 			       // AdvertiseNewTransactionInv(ipv4From, transactionHash, hopNumber, m_inPeers,
              //   floor(m_protocolSettings.lowfanoutOrderInPercent * 1.0 / 100.0 * m_inPeers.size()));
              break;
@@ -808,7 +808,7 @@ BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
       peersKnowTx[it].push_back(peer);
 
       rapidjson::Value txHop;
-      txHop.SetInt(firstTimeHops[it]);
+      txHop.SetInt(firstTimeHops[it] + 1);
       hopsArray.PushBack(txHop, allocator);
 
   }
@@ -827,7 +827,7 @@ BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
 
 
 void
-BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int transactionHash, int hopNumber)
+BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int transactionHash)
 {
   NS_LOG_FUNCTION (this);
   assert(m_protocolSettings.protocol == STANDARD_PROTOCOL);
@@ -840,13 +840,13 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
         delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       else
         delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds >> 1);
-      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber, false);
+      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, firstTimeHops[transactionHash] + 1, false);
     }
   }
 }
 
 void
-BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int peersToRelayTo)
+BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionHash, std::vector<Ipv4Address> peers, int peersToRelayTo)
 {
     NS_LOG_FUNCTION (this);
     if (peers.size() < peersToRelayTo)
@@ -868,7 +868,7 @@ BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionH
       }
       double delay = 0.1;
       delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
-      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, hopNumber, false);
+      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, firstTimeHops[transactionHash] + 1, false);
       peersToRelayTo--;
       tries = peers.size();
     }

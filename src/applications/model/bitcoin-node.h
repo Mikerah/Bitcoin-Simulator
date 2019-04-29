@@ -134,8 +134,8 @@ protected:
   void RemoveFromReconciliationSets(int txId, Ipv4Address peer);
 
   void AdvertiseTransactionInvWrapper (Address from, const int transactionHash, int hopNumber);
-  void AdvertiseNewTransactionInvStandard (Ipv4Address from, const int transactionHash, int hopNumber);
-  void AdvertiseNewTransactionInv (Ipv4Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int order);
+  void AdvertiseNewTransactionInvStandard (Ipv4Address from, const int transactionHash);
+  void AdvertiseNewTransactionInv (Ipv4Address from, const int transactionHash, std::vector<Ipv4Address> peers, int order);
 
   void SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber, bool recon);
 
