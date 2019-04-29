@@ -553,7 +553,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   int failSpying = 0;
   for (auto el: sourceIdentifiedBySpies) {
     auto txTime = el.second;
-    if (txTime.hopNumber == 0 || txTime.hopNumber == 999)
+    if (txTime.hopNumber == 0)
       successSpying++;
     else
       failSpying++;

@@ -31,8 +31,6 @@ NS_OBJECT_ENSURE_REGISTERED (BitcoinNode);
 
 int timeNotToCount = 20;
 
-int RECON_HOP = 999;
-
 
 int EstimateDifference(int setSize1, int setSize2, double multiplier) {
   return int(std::abs(setSize1 - setSize2) + multiplier * std::min(setSize1, setSize2));
@@ -95,7 +93,6 @@ BitcoinNode::BitcoinNode (void) : m_bitcoinPort (8333), m_secondsPerMin(60), m_c
   NS_LOG_FUNCTION (this);
   m_socket = 0;
   heardTotal = 0;
-  firstTimeHops = std::vector<int>(1024);
   m_numberOfPeers = m_peersAddresses.size();
   m_numInvsSent = 0;
   txCreator = false;
@@ -611,11 +608,14 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 std::vector<int> peerSet = std::vector<int>(m_peerReconciliationSets[peer]);
                 int mySubSetSize[SUB_SETS] = {0};
                 int hisSubSetSize[SUB_SETS] = {0};
+                int i = 0;
                 for (rapidjson::Value::ConstValueIterator itr = d["transactions"].Begin(); itr != d["transactions"].End(); ++itr) {
                     int txId = itr->GetInt();
                     hisSubSetSize[MurmurHash3Mixer(txId) % SUB_SETS]++;
                     peersKnowTx[txId].push_back(peer);
                     nodeBtransactions.insert(txId);
+                    int txHop = d["hops"][i];
+                    i++;
                     if (std::find(peerSet.begin(), peerSet.end(), txId) != peerSet.end()) {
                       continue;
                     } else {
@@ -624,7 +624,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                       }
                     }
                     iMissCounter++;
-                    SaveTxData(txId, peer, RECON_HOP);
+                    SaveTxData(txId, peer, txHop);
                     // AdvertiseTransactionInvWrapper(peer, txId, 0);
                 }
                 int heMissCounter = 0;
@@ -637,7 +637,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                         // Do not inv to out peer, it will learn it later ???
                         // Due to assymetry in the network
                         // m_peerReconciliationSets[peer].push_back(it);
-                        Simulator::Schedule (Seconds(0.1), &BitcoinNode::SendInvToNode, this, peer, it, RECON_HOP);
+                        Simulator::Schedule (Seconds(0.1), &BitcoinNode::SendInvToNode, this, peer, it, firstTimeHops[it], true);
                         heMissCounter++;
                     }
                 }
@@ -681,9 +681,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
               {
                 int   parsedInv = d["inv"][j].GetInt();
                 int   hopNumber = d["hop"].GetInt();
+                bool  isRecon = d["isRecon"].GetBool();
                 if (std::find(peersKnowTx[parsedInv].begin(), peersKnowTx[parsedInv].end(), peer) != peersKnowTx[parsedInv].end())
                   m_nodeStats->onTheFlyCollisions++;
-                if (hopNumber == RECON_HOP ) {
+                if (isRecon) {
                   m_nodeStats->reconInvReceivedMessages++;
                 } else {
                   m_nodeStats->invReceivedMessages++;
@@ -695,7 +696,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
 
                 if (std::find(knownTxHashes.begin(), knownTxHashes.end(), parsedInv) != knownTxHashes.end()) {
                     // loop handling
-                    if (hopNumber == RECON_HOP ) {
+                    if (isRecon) {
                       m_nodeStats->reconUselessInvReceivedMessages++;
                     } else {
                       m_nodeStats->uselessInvReceivedMessages++;
@@ -787,6 +788,7 @@ BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
 
   rapidjson::Value msg;
   rapidjson::Value txArray(rapidjson::kArrayType);
+  rapidjson::Value hopsArray(rapidjson::kArrayType);
 
   rapidjson::Document::AllocatorType& allocator = reconcileData.GetAllocator();
 
@@ -798,8 +800,14 @@ BitcoinNode::RespondToReconciliationRequest(Ipv4Address from)
       txhash.SetInt(it);
       txArray.PushBack(txhash,allocator);
       peersKnowTx[it].push_back(peer);
+
+      rapidjson::Value txHop;
+      txHop.SetInt(firstTimeHops[it]);
+      hopsArray.PushBack(txHop, allocator);
+
   }
   reconcileData.AddMember("transactions", txArray, allocator);
+  reconcileData.AddMember("hops", hopsArray, allocator);
   rapidjson::StringBuffer reconcileInfo;
   rapidjson::Writer<rapidjson::StringBuffer> reconcileWriter(reconcileInfo);
   reconcileData.Accept(reconcileWriter);
@@ -826,7 +834,7 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
         delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       else
         delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds >> 1);
-      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber);
+      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, hopNumber, false);
     }
   }
 }
@@ -854,14 +862,14 @@ BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionH
       }
       double delay = 0.1;
       delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
-      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, hopNumber);
+      Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, hopNumber, false);
       peersToRelayTo--;
       tries = peers.size();
     }
 }
 
 void
-BitcoinNode::SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber) {
+BitcoinNode::SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber, bool recon) {
   bool alreadyKnows = std::find(peersKnowTx[transactionHash].begin(), peersKnowTx[transactionHash].end(), receiver) != peersKnowTx[transactionHash].end();
 
   if (alreadyKnows)
@@ -882,6 +890,9 @@ BitcoinNode::SendInvToNode(Ipv4Address receiver, const int transactionHash, int 
 
   value = hopNumber;
   inv.AddMember("hop", value, inv.GetAllocator());
+
+  value = recon;
+  inv.AddMember("recon", value, inv.GetAllocator());
 
 
   rapidjson::StringBuffer invInfo;
@@ -936,6 +947,7 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from, int hopNumber) {
   if (m_protocolSettings.reconciliationMode != RECON_OFF) {
     AddToReconciliationSets(txId, from);
   }
+  firstTimeHops[txId] = hopNumber;
 }
 
 void BitcoinNode::AddToReconciliationSets(int txId, Ipv4Address from) {

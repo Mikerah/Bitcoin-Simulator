@@ -137,7 +137,7 @@ protected:
   void AdvertiseNewTransactionInvStandard (Ipv4Address from, const int transactionHash, int hopNumber);
   void AdvertiseNewTransactionInv (Ipv4Address from, const int transactionHash, int hopNumber, std::vector<Ipv4Address> peers, int order);
 
-  void SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber);
+  void SendInvToNode(Ipv4Address receiver, const int transactionHash, int hopNumber, bool recon);
 
   void RespondToReconciliationRequest(Ipv4Address from);
 
@@ -223,7 +223,7 @@ protected:
   ProtocolSettings m_protocolSettings;
 
   uint64_t heardTotal;
-  std::vector<int> firstTimeHops;
+  std::map<int, int> firstTimeHops;
   bool txCreator;
 
   int voidReconciliations;
