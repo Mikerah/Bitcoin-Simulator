@@ -597,7 +597,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case RECONCILE_TX_REQUEST:
             {
                 size_t set =  d["setSize"].GetInt();
-                auto delay = PoissonNextSend(1) + 2;
+                auto delay = PoissonNextSendIncoming(1);
                 Simulator::Schedule (Seconds(delay), &BitcoinNode::RespondToReconciliationRequest, this, peer);
                 break;
             }
@@ -609,7 +609,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int mySubSetSize[SUB_SETS] = {0};
                 int hisSubSetSize[SUB_SETS] = {0};
                 int i = 0;
-                std::vector<int> hops;
+                std::vector<int> hops(1024);
                 for (rapidjson::Value::ConstValueIterator itr = d["hops"].Begin(); itr != d["hops"].End(); ++itr) {
                     hops[i] = itr->GetInt();
                     i++;
@@ -687,7 +687,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
               {
                 int   parsedInv = d["inv"][j].GetInt();
                 int   hopNumber = d["hop"].GetInt();
-                bool  isRecon = d["isRecon"].GetBool();
+                bool  isRecon = d["recon"].GetBool();
                 if (std::find(peersKnowTx[parsedInv].begin(), peersKnowTx[parsedInv].end(), peer) != peersKnowTx[parsedInv].end())
                   m_nodeStats->onTheFlyCollisions++;
                 if (isRecon) {
