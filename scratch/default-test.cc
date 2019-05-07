@@ -223,16 +223,6 @@ main (int argc, char *argv[])
 
       assert (publicSpies == 0 || privateSpies == 0);
 
-      if (publicSpies != 0) {
-        if (node.first > blackHoles && node.first < blackHoles + publicSpies) {
-          mode = SPY;
-        }
-        // emitters are private nodes
-        if (node.first > publicIPNodes && node.first < TX_EMITTERS + publicIPNodes) {
-          mode = TX_EMITTER;
-        }
-      }
-
       if (privateSpies != 0) {
         if (node.first > publicIPNodes && node.first < publicIPNodes + privateSpies) {
           mode = SPY;
@@ -240,6 +230,14 @@ main (int argc, char *argv[])
         // emitters are public nodes
         assert(TX_EMITTERS < publicIPNodes);
         if (node.first > blackHoles && node.first < TX_EMITTERS) {
+          mode = TX_EMITTER;
+        }
+      } else { // perhaps publicSpies != 0
+        if (node.first > blackHoles && node.first < blackHoles + publicSpies) {
+          mode = SPY;
+        }
+        // emitters are private nodes
+        if (node.first > publicIPNodes && node.first < TX_EMITTERS + publicIPNodes) {
           mode = TX_EMITTER;
         }
       }
