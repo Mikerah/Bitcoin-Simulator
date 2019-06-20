@@ -492,8 +492,8 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
   bool emit = (rand() % revProbability) == 0;
 
   // Do not emit transactions which will be never reconciled in the network
-  if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
-    return;
+  // if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
+  //   return;
 
   if (emit)
     EmitTransaction();
@@ -649,8 +649,8 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 }
                 m_peerReconciliationSets[peer].clear();
                 int totalDiff = iMissCounter + heMissCounter;
-                if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
-                  break;
+                // if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
+                //   break;
 
                 // int estimatedDiff = (EstimateDifference(peerSet.size(), d["transactions"].Size(), 0.1) * m_protocolSettings.qEstimationMultiplier +
                 //   m_reconciliationHistory[peer] * (1-m_protocolSettings.qEstimationMultiplier));
@@ -957,8 +957,8 @@ void BitcoinNode::SaveTxData(int txId, Ipv4Address from, int hopNumber) {
 }
 
 void BitcoinNode::AddToReconciliationSets(int txId, Ipv4Address from) {
-  if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
-    return;
+  // if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
+  //   return;
 
   // std::cout << "Node " << m_nodeStats->nodeId << " adds tx: " << txId << "from peer" << from << std::endl;
   for (std::vector<Ipv4Address>::const_iterator i = m_peersAddresses.begin(); i != m_peersAddresses.end(); ++i)
