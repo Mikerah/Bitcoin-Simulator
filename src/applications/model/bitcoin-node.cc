@@ -314,11 +314,12 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
 
 
 void BitcoinNode::LogTime() {
-  std::cout << Simulator::Now().GetSeconds() << std::endl;
+  if (Simulator::Now().GetSeconds() % 10 == 0)
+    std::cout << Simulator::Now().GetSeconds() << std::endl;
   if (m_timeToRun < Simulator::Now().GetSeconds()) {
     return;
   }
-  Simulator::Schedule (Seconds(10), &BitcoinNode::LogTime, this);
+  Simulator::Schedule (Seconds(0.1), &BitcoinNode::LogTime, this);
 }
 
 void BitcoinNode::RotateDandelionDestinations() {
