@@ -408,7 +408,7 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
 
   int allTxsCount = allTxRelayTimes.size();
   std::set<int> allTxIds;
-  for(std::map<int, int>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
+  for(std::map<int, std::vector<double>>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
       int txId = it->first;
       allTxIds.insert(txId);
   }
