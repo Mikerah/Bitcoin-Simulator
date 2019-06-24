@@ -536,6 +536,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
       if (m_mode == BLACK_HOLE)
         return;
 
+      if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
+        return;
+
+
       if (InetSocketAddress::IsMatchingType (from))
       {
         /**
