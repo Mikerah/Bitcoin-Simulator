@@ -38,6 +38,7 @@ using namespace ns3;
 double get_wall_time();
 int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr);
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate);
+void FindMissingTransacions(nodeStatistics *stats, int totalNodes);
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
@@ -351,7 +352,7 @@ main (int argc, char *argv[])
     tFinish=get_wall_time();
 
     PrintStatsForEachNode(stats, totalNoNodes, publicIPNodes, blackHoles, bisectionRate);
-
+    FindMissingTransacions(stats, totalNoNodes);
 
     std::cout << "\nThe simulation ran for " << tFinish - tStart << "s simulating "
               << stop << "mins. Performed " << stop * secsPerMin / (tFinish - tStart)
@@ -401,6 +402,42 @@ int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr)
   }
   return -1; //if not found
 }
+
+void FindMissingTransacions (nodeStatistics *stats, int totalNodes) {
+  std::cout << "Missing transactions:" << std::endl;
+
+
+  int allTxsCount = allTxRelayTimes.size();
+  std::set<int> allTxIds;
+  for(std::map<int, int>::const_iterator it = m.begin(); it != m.end(); it++){
+      int txId = it->first;
+      allTxIds.insert(txId);
+  }
+
+  for (int it = 0; it < totalNodes; it++) {
+    if (stats[it].txReceived == allTxsCount) {
+      std::cout << "\nNode " << node.first << ":    " ;
+      continue;
+    }
+
+    // Removing from this set one by one
+    std::set<int> missingTxs(allTxIds.begin(), allTxIds.end());
+
+    for (int txCount = 0; txCount < stats[it].txReceived; txCount++) {      
+      txRecvTime txTime = stats[it].txReceivedTimes[txCount];
+      missingTxs.erase(txTime.txHash);
+    }
+
+    set<int>::iterator tx;
+    for (tx = missingTxs.begin(); tx != missingTxs.end(); ++tx) {
+        cout << *tx << " ";
+    }
+
+    // TODO print
+    std::cout << std::endl;
+  }
+}
+
 
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate)
 {
@@ -540,10 +577,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
         else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
-        // if (txTime.hopNumber == 999)
-        //   sourceIdentifiedBySpiesRecon.insert(txTime.txHash); 
       }
-
     }
   }
 
