@@ -491,7 +491,7 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
   int revProbability = TX_EMITTERS/transactionRates[currentMinute];
   bool emit = (rand() % revProbability) == 0;
 
-  Do not emit transactions which will be never reconciled in the network
+  // Do not emit transactions which will be never reconciled in the network
   if (m_timeToRun < Simulator::Now().GetSeconds() + timeNotToCount)
     return;
 
