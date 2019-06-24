@@ -431,7 +431,6 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
         std::cout << *tx << " ";
     }
 
-    // TODO print
     std::cout << std::endl;
   }
 }

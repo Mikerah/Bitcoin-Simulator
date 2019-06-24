@@ -314,7 +314,7 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
 
 
 void BitcoinNode::LogTime() {
-  if (Simulator::Now().GetSeconds() % 10 == 0)
+  if (int(Simulator::Now().GetSeconds()) % 10 == 0)
     std::cout << Simulator::Now().GetSeconds() << std::endl;
   if (m_timeToRun < Simulator::Now().GetSeconds()) {
     return;
