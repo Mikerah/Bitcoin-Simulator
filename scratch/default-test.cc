@@ -38,7 +38,7 @@ using namespace ns3;
 double get_wall_time();
 int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr);
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate);
-void FindMissingTransacions(nodeStatistics *stats, int totalNodes);
+void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int, std::vector<double>> allTxRelayTimes);
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
@@ -352,7 +352,6 @@ main (int argc, char *argv[])
     tFinish=get_wall_time();
 
     PrintStatsForEachNode(stats, totalNoNodes, publicIPNodes, blackHoles, bisectionRate);
-    FindMissingTransacions(stats, totalNoNodes);
 
     std::cout << "\nThe simulation ran for " << tFinish - tStart << "s simulating "
               << stop << "mins. Performed " << stop * secsPerMin / (tFinish - tStart)
@@ -403,7 +402,7 @@ int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr)
   return -1; //if not found
 }
 
-void FindMissingTransacions (nodeStatistics *stats, int totalNodes) {
+void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int, std::vector<double>> allTxRelayTimes) {
   std::cout << "Missing transactions:" << std::endl;
 
 
@@ -416,7 +415,7 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes) {
 
   for (int it = 0; it < totalNodes; it++) {
     if (stats[it].txReceived == allTxsCount) {
-      std::cout << "\nNode " << node.first << ":    " ;
+      std::cout << "\nNode " << stats[it].nodeId << ":    " ;
       continue;
     }
 
@@ -428,9 +427,8 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes) {
       missingTxs.erase(txTime.txHash);
     }
 
-    set<int>::iterator tx;
-    for (tx = missingTxs.begin(); tx != missingTxs.end(); ++tx) {
-        cout << *tx << " ";
+    for (std::set<int>::iterator tx = missingTxs.begin(); tx != missingTxs.end(); ++tx) {
+        std::cout << *tx << " ";
     }
 
     // TODO print
@@ -702,6 +700,8 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     std::cout <<  (i + 1) * (100 / GRANULARITY) - 1 << "% to ";
     std::cout << " relay time: " << accumulate(percentRelayTimes[i].begin(), percentRelayTimes[i].end(), 0.0) / percentRelayTimes[i].size() << ", txs: " << percentRelayTimes[i].size() << "\n";
   }
+
+  FindMissingTransacions(stats, totalNoNodes, allTxRelayTimes);
 
 
 }
