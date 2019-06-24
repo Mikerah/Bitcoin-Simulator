@@ -408,7 +408,7 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
 
   int allTxsCount = allTxRelayTimes.size();
   std::set<int> allTxIds;
-  for(std::map<int, int>::const_iterator it = m.begin(); it != m.end(); it++){
+  for(std::map<int, int>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
       int txId = it->first;
       allTxIds.insert(txId);
   }
@@ -701,7 +701,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     std::cout << " relay time: " << accumulate(percentRelayTimes[i].begin(), percentRelayTimes[i].end(), 0.0) / percentRelayTimes[i].size() << ", txs: " << percentRelayTimes[i].size() << "\n";
   }
 
-  FindMissingTransacions(stats, totalNoNodes, allTxRelayTimes);
+  FindMissingTransacions(stats, totalNodes, allTxRelayTimes);
 
 
 }
