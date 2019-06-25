@@ -414,8 +414,8 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
   }
 
   for (int it = 0; it < totalNodes; it++) {
-    if (stats[it].txReceived == allTxsCount) {
       std::cout << "\nNode " << stats[it].nodeId << ":    " ;
+    if (stats[it].txReceived == allTxsCount) {
       continue;
     }
 
