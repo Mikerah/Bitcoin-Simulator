@@ -430,8 +430,6 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
     for (std::set<int>::iterator tx = missingTxs.begin(); tx != missingTxs.end(); ++tx) {
         std::cout << *tx << " ";
     }
-
-    std::cout << std::endl;
   }
 }
 
