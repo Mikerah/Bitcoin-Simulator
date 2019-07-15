@@ -42,6 +42,8 @@ void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int,
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
+void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
+   int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
 void CollectReconcilData(nodeStatistics *stats, int totalNoNodes,
   int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
 int PoissonDistribution(int value);
@@ -276,11 +278,11 @@ main (int argc, char *argv[])
 
   #ifdef MPI_TEST
 
-    int            blocklen[14] = {1, 1, 1, 1, 1, 1,
-                                   1, 1, 1, 1, 1, 1, 1, 1};
-    MPI_Aint       disp[14];
-    MPI_Datatype   dtypes[14] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
-                                 MPI_DOUBLE, MPI_LONG, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
+    int            blocklen[15] = {1, 1, 1, 1, 1, 1,
+                                   1, 1, 1, 1, 1, 1, 1, 1, 1};
+    MPI_Aint       disp[15];
+    MPI_Datatype   dtypes[15] = {MPI_INT, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_LONG, MPI_INT,
+                                 MPI_DOUBLE, MPI_LONG, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
     MPI_Datatype   mpi_nodeStatisticsType;
 
     disp[0] = offsetof(nodeStatistics, nodeId);
@@ -293,6 +295,7 @@ main (int argc, char *argv[])
     disp[7] = offsetof(nodeStatistics, firstSpySuccess);
     disp[8] = offsetof(nodeStatistics, onTheFlyCollisions);
     disp[9] = offsetof(nodeStatistics, txReceived);
+    disp[9] = offsetof(nodeStatistics, txAnnounced);
     disp[10] = offsetof(nodeStatistics, systemId);
     disp[11] = offsetof(nodeStatistics, ignoredFilters);
     disp[12] = offsetof(nodeStatistics, reconcils);
@@ -334,6 +337,7 @@ main (int argc, char *argv[])
         stats[recv.nodeId].firstSpySuccess = recv.firstSpySuccess;
         stats[recv.nodeId].onTheFlyCollisions = recv.onTheFlyCollisions;
         stats[recv.nodeId].txReceived = recv.txReceived;
+        stats[recv.nodeId].txAnnounced = recv.txAnnounced;
         stats[recv.nodeId].systemId = recv.systemId;
         stats[recv.nodeId].ignoredFilters = recv.ignoredFilters;
         stats[recv.nodeId].reconcils = recv.reconcils;
@@ -343,6 +347,7 @@ main (int argc, char *argv[])
     }
 
     CollectTxData(stats, totalNoNodes, systemId, systemCount, nodesInSystemId0, bitcoinTopologyHelper);
+    CollectAnnData(stats, totalNoNodes, systemId, systemCount, nodesInSystemId0, bitcoinTopologyHelper);
     CollectReconcilData(stats, totalNoNodes, systemId, systemCount, nodesInSystemId0, bitcoinTopologyHelper);
   #endif
 
@@ -463,6 +468,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
 
   std::map<int, txRecvTime> sourceIdentifiedBySpies;
+  std::map<int, std::vector<txAnnTime>> announcedToSpies;
 
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
@@ -572,6 +578,11 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
         else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
+
+        for (txAnnTime announcement: stats[it].txAnnounced) {
+          announcedToSpies[txTime.txHash].push_back(announcement);
+        }
+
       }
     }
   }
@@ -774,6 +785,7 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
     int count = 0;
     MPI_Status status;
     txRecvTime recv;
+    txAnnouncedTime ann;
 
     while (count < totalNoNodes)
     {
@@ -791,6 +803,63 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
   }
 #endif
 }
+
+void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
+  int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper)
+{
+#ifdef MPI_TEST
+  int            blocklen[4] = {1, 1, 1, 1};
+  MPI_Aint       disp[4];
+  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT};
+  MPI_Datatype   mpi_txAnnTime;
+
+  disp[0] = offsetof(txAnnTime, nodeId);
+  disp[1] = offsetof(txAnnTime, txHash);
+  disp[2] = offsetof(txAnnTime, txTime);
+  disp[3] = offsetof(txAnnTime, heardFrom);
+
+  MPI_Type_create_struct (4, blocklen, disp, dtypes, &mpi_txAnnTime);
+  MPI_Type_commit (&mpi_txAnnTime);
+
+  if (systemId != 0 && systemCount > 1)
+  {
+    for(int i = nodesInSystemId0; i < totalNoNodes; i++)
+    {
+      Ptr<Node> targetNode = bitcoinTopologyHelper.GetNode(i);
+      if (stats[i].mode == BLACK_HOLE)
+        continue;
+      if (systemId == targetNode->GetSystemId())
+      {
+          for (int j = 0; j < stats[i].txAnnounced; j++) {
+            MPI_Send(&stats[i].txAnnouncedTimes[j], 1, mpi_txAnnTime, 0, 8899, MPI_COMM_WORLD);
+          }
+
+      }
+    }
+  }
+  else if (systemId == 0 && systemCount > 1)
+  {
+    int count = 0;
+    MPI_Status status;
+    txAnnTime ann;
+
+    while (count < totalNoNodes)
+    {
+      if (stats[count].systemId == 0 || stats[count].mode == BLACK_HOLE) {
+        count++;
+        continue;
+      }
+      for (int j = 0; j < stats[count].txAnnounced; j++)
+       {
+          MPI_Recv(&ann, 1, mpi_txRecvTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);
+          stats[recv.nodeId].txAnnounced.push_back(ann);
+      }
+      count++;
+    }
+  }
+#endif
+}
+
 
 
 void CollectReconcilData(nodeStatistics *stats, int totalNoNodes,

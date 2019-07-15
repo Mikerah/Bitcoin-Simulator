@@ -76,8 +76,15 @@ typedef struct {
   int txHash;
   double txTime;
   int hopNumber;
-  int heardFrom;
 } txRecvTime;
+
+typedef struct {
+  int nodeId;
+  int txHash;
+  double txTime;
+  int heardFrom;
+} txAnnTime;
+
 
 
 typedef struct {
@@ -109,7 +116,7 @@ typedef struct {
   int systemId;
 
   std::vector<txRecvTime> txReceivedTimes;
-  std::vector<txRecvTime> txAnnouncedTimes;
+  std::vector<txAnnTime> txAnnouncedTimes;
   int ignoredFilters;
 
   int reconcils;

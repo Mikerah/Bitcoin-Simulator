@@ -954,13 +954,12 @@ BitcoinNode::SendMessage(enum Messages receivedMessage,  enum Messages responseM
 }
 
 void BitcoinNode::LogReceivingTx(int txId, Ipv4Address from) {
-  txRecvTime txTime;
+  txAnnTime txTime;
   txTime.nodeId = GetNode()->GetId();
   txTime.txHash = txId;
   txTime.txTime = Simulator::Now().GetMilliSeconds();
-  txTime.hopNumber = 0;
   txTime.heardFrom = peersId[from];
-  m_nodeStats->txAnnouncedTimes.push_back(txTime);
+  m_nodeStats->txAnnTimes.push_back(txTime);
   m_nodeStats->txAnnounced++;
 }
 
