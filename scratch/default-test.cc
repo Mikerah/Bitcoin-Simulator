@@ -578,11 +578,11 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
         else if (sourceIdentifiedBySpies[txTime.txHash].txTime > txTime.txTime)
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
-
-        for (txAnnTime announcement: stats[it].txAnnounced) {
-          announcedToSpies[txTime.txHash].push_back(announcement);
-        }
-
+      }
+    }
+    for (int annCount = 0; annCount < stats[it].txAnnounced; annCount++) {
+      for (txAnnTime announcement: stats[it].txAnnouncedTimes) {
+        announcedToSpies[announcement.txHash].push_back(announcement);
       }
     }
   }
@@ -851,8 +851,8 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
       }
       for (int j = 0; j < stats[count].txAnnounced; j++)
        {
-          MPI_Recv(&ann, 1, mpi_txRecvTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);
-          stats[recv.nodeId].txAnnounced.push_back(ann);
+          MPI_Recv(&ann, 1, mpi_txAnnTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);
+          stats[recv.nodeId].txAnnouncedTimes.push_back(ann);
       }
       count++;
     }
