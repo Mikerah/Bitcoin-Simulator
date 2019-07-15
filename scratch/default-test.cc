@@ -852,7 +852,7 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
       for (int j = 0; j < stats[count].txAnnounced; j++)
        {
           MPI_Recv(&ann, 1, mpi_txAnnTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);
-          stats[recv.nodeId].txAnnouncedTimes.push_back(ann);
+          stats[ann.nodeId].txAnnouncedTimes.push_back(ann);
       }
       count++;
     }
