@@ -698,7 +698,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     std::cout << " relay time: " << accumulate(percentRelayTimes[i].begin(), percentRelayTimes[i].end(), 0.0) / percentRelayTimes[i].size() << ", txs: " << percentRelayTimes[i].size() << "\n";
   }
 
-  FindMissingTransacions(stats, totalNodes, allTxRelayTimes);
+  // FindMissingTransacions(stats, totalNodes, allTxRelayTimes);
 
 
 }

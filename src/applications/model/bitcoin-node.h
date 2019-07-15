@@ -130,6 +130,8 @@ protected:
   void EmitTransaction(void);
 
   void SaveTxData(int txId, Ipv4Address from, int hopNumber);
+  void LogReceivingTx(int txId, Ipv4Address from);
+
   void AddToReconciliationSets(int txId, Ipv4Address from);
   void RemoveFromReconciliationSets(int txId, Ipv4Address peer);
 
@@ -188,6 +190,8 @@ protected:
   std::map<ns3::Ipv4Address, uint32_t> filterBegin;        //!< The start of the filter for each peer
   std::map<ns3::Ipv4Address, uint32_t> filterEnd;          //!< The end of the filter for each peer
   std::map<Ipv4Address, ModeType> peersMode;
+  std::map<Ipv4Address, int> peersId;
+
 
   uint lastTxId;
   std::vector<int> knownTxHashes;

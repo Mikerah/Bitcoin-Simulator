@@ -21,7 +21,7 @@ const int SUB_SETS = 4;
 
 
 
-const int TX_EMITTERS = 500;
+const int TX_EMITTERS = 10;
 
 const int RECON_MAX_SET_SIZE = 1600;
 
@@ -76,7 +76,9 @@ typedef struct {
   int txHash;
   double txTime;
   int hopNumber;
+  int heardFrom;
 } txRecvTime;
+
 
 typedef struct {
   int nodeId;
@@ -103,9 +105,11 @@ typedef struct {
   long onTheFlyCollisions;
 
   int txReceived;
+  int txAnnounced;
   int systemId;
 
   std::vector<txRecvTime> txReceivedTimes;
+  std::vector<txRecvTime> txAnnouncedTimes;
   int ignoredFilters;
 
   int reconcils;

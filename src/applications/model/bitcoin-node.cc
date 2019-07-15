@@ -285,6 +285,7 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
 
   m_nodeStats->firstSpySuccess = 0;
   m_nodeStats->txReceived = 0;
+  m_nodeStats->txAnnounced = 0;
 
   m_nodeStats->systemId = m_systemId;
 
@@ -454,9 +455,11 @@ BitcoinNode::AnnounceMode (void)
 
     rapidjson::Value modeValue;
     modeValue.SetInt(m_mode);
-
-
     modeData.AddMember("mode", modeValue, modeData.GetAllocator());
+
+    rapidjson::Value idValue;
+    modeValue.SetInt(GetNode()->GetId());
+    modeData.AddMember("id", idValue, modeData.GetAllocator());
 
 
     rapidjson::StringBuffer modeInfo;
@@ -489,7 +492,7 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
 
   // 7 tx/s
   int currentMinute = Simulator::Now().GetSeconds() / 60;
-  int revProbability = TX_EMITTERS/transactionRates[currentMinute];
+  int revProbability = TX_EMITTERS / 0.1;
   bool emit = (rand() % revProbability) == 0;
 
   // Do not emit transactions which will be never reconciled in the network
@@ -498,7 +501,7 @@ BitcoinNode::ScheduleNextTransactionEvent (void)
 
   if (emit)
     EmitTransaction();
-  Simulator::Schedule (Seconds(1), &BitcoinNode::ScheduleNextTransactionEvent, this);
+  Simulator::Schedule (Seconds(60), &BitcoinNode::ScheduleNextTransactionEvent, this);
 }
 
 void
@@ -596,7 +599,9 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
             case MODE:
             {
               ModeType mode = ModeType(d["mode"].GetInt());
+              int peerId = d["id"].GetInt();
               peersMode[peer] = mode;
+              peersId[peer]= peerId;
               break;
             }
             case RECONCILE_TX_REQUEST:
@@ -704,6 +709,9 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 if (m_protocolSettings.reconciliationMode != RECON_OFF) {
                   RemoveFromReconciliationSets(parsedInv, peer);
                 }
+
+                if (m_mode == SPY)
+                  LogReceivingTx(parsedInv, peer);
 
                 if (std::find(knownTxHashes.begin(), knownTxHashes.end(), parsedInv) != knownTxHashes.end()) {
                     // loop handling
@@ -840,7 +848,7 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
   {
     if (i != from)
     {
-      double delay = 0.1;
+      double delay = 0.00001;
       if (std::find(m_outPeers.begin(), m_outPeers.end(), i) == m_outPeers.end())
         delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
       else
@@ -871,7 +879,7 @@ BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionH
         else
           continue;
       }
-      double delay = 0.1;
+      double delay = 0.00001;
       delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, firstTimeHops[transactionHash] + 1, false);
       peersToRelayTo--;
@@ -944,6 +952,19 @@ BitcoinNode::SendMessage(enum Messages receivedMessage,  enum Messages responseM
   m_peersSockets[outgoingIpv4Address]->Send (reinterpret_cast<const uint8_t*>(buffer.GetString()), buffer.GetSize(), 0);
   m_peersSockets[outgoingIpv4Address]->Send (delimiter, 1, 0);
 }
+
+void BitcoinNode::LogReceivingTx(int txId, Ipv4Address from) {
+  txRecvTime txTime;
+  txTime.nodeId = GetNode()->GetId();
+  txTime.txHash = txId;
+  txTime.txTime = Simulator::Now().GetMilliseconds();
+  txTime.hopNumber = 0;
+  txTime.heardFrom = peersId[from];
+  m_nodeStats->txAnnouncedTimes.push_back(txTime);
+  m_nodeStats->txAnnounced++;
+}
+
+
 
 void BitcoinNode::SaveTxData(int txId, Ipv4Address from, int hopNumber) {
   assert(std::find(knownTxHashes.begin(), knownTxHashes.end(), txId) == knownTxHashes.end());
