@@ -785,7 +785,7 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
     int count = 0;
     MPI_Status status;
     txRecvTime recv;
-    txAnnouncedTime ann;
+    txAnnTime ann;
 
     while (count < totalNoNodes)
     {
