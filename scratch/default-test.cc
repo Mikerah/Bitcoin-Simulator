@@ -587,6 +587,18 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     }
   }
 
+  std::cout << "Spies received blocks " << std::endl;
+
+  for (auto const &block : mymap) {
+    std::cout << block.first << std::endl;
+    for (auto const &announcement : ent1.second) { 
+      std::<< cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
+    }
+  }
+
+  std::cout << "Spies received txs END" << std::endl;
+
+
   int successSpying = 0;
   int failSpying = 0;
   for (auto el: sourceIdentifiedBySpies) {
