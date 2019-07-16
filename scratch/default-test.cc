@@ -594,7 +594,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::cout << "Spies received blocks:  " << announcedToSpies.size() << std::endl;
 
   for (auto const &block : announcedToSpies) {
-    std::cout << block.first << std::endl;
+    std::cout << block.first << ": " << block.second.size() << std::endl;
     for (auto const &announcement : block.second) { 
       std::cout << announcement.first << ": " << announcement.second << "; ";
     }
