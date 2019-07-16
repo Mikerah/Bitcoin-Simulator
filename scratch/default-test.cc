@@ -589,9 +589,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
   std::cout << "Spies received blocks " << std::endl;
 
-  for (auto const &block : mymap) {
+  for (auto const &block : announcedToSpies) {
     std::cout << block.first << std::endl;
-    for (auto const &announcement : ent1.second) { 
+    for (auto const &announcement : block.second) { 
       std::cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
     }
   }
