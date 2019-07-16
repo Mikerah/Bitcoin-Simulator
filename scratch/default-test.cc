@@ -468,7 +468,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
 
 
   std::map<int, txRecvTime> sourceIdentifiedBySpies;
-  std::map<int, std::vector<txAnnTime>> announcedToSpies;
+  std::map<int, std::map<int, int>> announcedToSpies;
 
   long failAfterBisection = 0;
   long bisectionSyndromes = 0;
@@ -582,7 +582,11 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     }
     for (int annCount = 0; annCount < stats[it].txAnnounced; annCount++) {
       for (txAnnTime announcement: stats[it].txAnnouncedTimes) {
-        announcedToSpies[announcement.txHash].push_back(announcement);
+        auto announcedMap = announcedToSpies[announcement.txHash];
+        if (announcedMap.count(announcement.heardFrom) == 0 || announcedMap[announcement.heardFrom] >= announcement.txTime) {
+          announcedMap[announcement.heardFrom] = announcement.txTime;
+        }
+
       }
     }
   }
@@ -592,7 +596,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   for (auto const &block : announcedToSpies) {
     std::cout << block.first << std::endl;
     for (auto const &announcement : block.second) { 
-      std::cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
+      std::cout << announcement.first << ": " << announcement.second << "; ";
     }
     std::cout << std::endl;
   }
