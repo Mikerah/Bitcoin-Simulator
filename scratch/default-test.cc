@@ -583,11 +583,9 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     for (int annCount = 0; annCount < stats[it].txAnnounced; annCount++) {
       for (txAnnTime announcement: stats[it].txAnnouncedTimes) {
         auto announcedMap = announcedToSpies[announcement.txHash];
-        std::cout << "a: " << (announcedMap.count(announcement.heardFrom) == 0) << ", b: " << (announcedMap[announcement.heardFrom] >= announcement.txTime);
         if (announcedMap.count(announcement.heardFrom) == 0 || announcedMap[announcement.heardFrom] >= announcement.txTime) {
-          announcedMap[announcement.heardFrom] = announcement.txTime;
+          announcedToSpies[announcement.txHash][announcement.heardFrom] = announcement.txTime;
         }
-
       }
     }
   }
