@@ -458,7 +458,8 @@ BitcoinNode::AnnounceMode (void)
     modeData.AddMember("mode", modeValue, modeData.GetAllocator());
 
     rapidjson::Value idValue;
-    modeValue.SetInt(GetNode()->GetId());
+    int nodeId = GetNode()->GetId();
+    idValue.SetInt(nodeId);
     modeData.AddMember("id", idValue, modeData.GetAllocator());
 
 
