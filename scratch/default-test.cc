@@ -592,7 +592,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   for (auto const &block : mymap) {
     std::cout << block.first << std::endl;
     for (auto const &announcement : ent1.second) { 
-      std::<< cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
+      std::cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
     }
   }
 
