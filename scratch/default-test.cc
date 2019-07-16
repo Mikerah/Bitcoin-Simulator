@@ -594,6 +594,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
     for (auto const &announcement : block.second) { 
       std::cout << announcement.heardFrom << ": " << announcement.txTime << "; ";
     }
+    std::cout << std::endl;
   }
 
   std::cout << "Spies received txs END" << std::endl;
