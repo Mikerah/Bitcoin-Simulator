@@ -711,7 +711,7 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                   RemoveFromReconciliationSets(parsedInv, peer);
                 }
 
-                if (m_mode == SPY)
+                if (m_mode == SPY && peersMode[peer] != SPY)
                   LogReceivingTx(parsedInv, peer);
 
                 if (std::find(knownTxHashes.begin(), knownTxHashes.end(), parsedInv) != knownTxHashes.end()) {
