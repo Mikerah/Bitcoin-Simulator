@@ -586,11 +586,15 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
           sourceIdentifiedBySpies[txTime.txHash] = txTime;
       }
     }
-    for (int annCount = 0; annCount < stats[it].txAnnounced; annCount++) {
-      for (txAnnTime announcement: stats[it].txAnnouncedTimes) {
-        auto announcedMap = announcedToSpies[announcement.txHash];
-        if (announcedMap.count(announcement.heardFrom) == 0 || announcedMap[announcement.heardFrom] >= announcement.txTime) {
-          announcedToSpies[announcement.txHash][announcement.heardFrom] = announcement.txTime;
+
+    if (stats[it].mode == SPY) {
+      std::cout << "Spies found announcements: " << stats[it].txAnnounced;
+      for (int annCount = 0; annCount < stats[it].txAnnounced; annCount++) {
+        for (txAnnTime announcement: stats[it].txAnnouncedTimes) {
+          auto announcedMap = announcedToSpies[announcement.txHash];
+          if (announcedMap.count(announcement.heardFrom) == 0 || announcedMap[announcement.heardFrom] >= announcement.txTime) {
+            announcedToSpies[announcement.txHash][announcement.heardFrom] = announcement.txTime;
+          }
         }
       }
     }
@@ -848,7 +852,7 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
     for(int i = nodesInSystemId0; i < totalNoNodes; i++)
     {
       Ptr<Node> targetNode = bitcoinTopologyHelper.GetNode(i);
-      if (stats[i].mode == BLACK_HOLE)
+      if (stats[i].mode != SPY)
         continue;
       if (systemId == targetNode->GetSystemId())
       {
@@ -867,10 +871,11 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
 
     while (count < totalNoNodes)
     {
-      if (stats[count].systemId == 0 || stats[count].mode == BLACK_HOLE) {
+      if (stats[count].systemId == 0 || stats[count].mode != SPY) {
         count++;
         continue;
       }
+      std::cout << "Announces spied: " << stats[count].txAnnounced;
       for (int j = 0; j < stats[count].txAnnounced; j++)
        {
           MPI_Recv(&ann, 1, mpi_txAnnTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);
