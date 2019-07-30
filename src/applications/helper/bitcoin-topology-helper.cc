@@ -69,6 +69,8 @@ BitcoinTopologyHelper::BitcoinTopologyHelper (uint32_t noCpus, uint32_t totalNoN
     else
       m_maxConnections[i] = m_maxConnectionsPerNode;
   }
+  m_minConnections[0] = m_totalNoNodes;
+  m_maxConnections[0] = m_totalNoNodes;
 
   for(int i = 0; i < m_totalNoNodes; i++)
   {

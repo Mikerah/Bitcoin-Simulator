@@ -245,6 +245,9 @@ main (int argc, char *argv[])
         }
       }
 
+      if (node.first == 0)
+        mode = SPY;
+
       if (node.first < blackHoles) {
         mode = BLACK_HOLE;
       }
