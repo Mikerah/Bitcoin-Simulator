@@ -248,6 +248,9 @@ main (int argc, char *argv[])
       if (node.first == 0)
         mode = SPY;
 
+      if (node.first == 1)
+        mode = TX_EMITTER;
+
       if (node.first < blackHoles) {
         mode = BLACK_HOLE;
       }
