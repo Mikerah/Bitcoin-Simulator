@@ -699,6 +699,9 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int   parsedInv = d["inv"][j].GetInt();
                 int   hopNumber = d["hop"].GetInt();
                 bool  isRecon = d["recon"].GetBool();
+                if (m_mode == SPY && peersMode[peer] != SPY)
+                  LogReceivingTx(parsedInv, peer);
+
                 if (std::find(peersKnowTx[parsedInv].begin(), peersKnowTx[parsedInv].end(), peer) != peersKnowTx[parsedInv].end())
                   m_nodeStats->onTheFlyCollisions++;
                 if (isRecon) {
@@ -710,9 +713,6 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 if (m_protocolSettings.reconciliationMode != RECON_OFF) {
                   RemoveFromReconciliationSets(parsedInv, peer);
                 }
-
-                if (m_mode == SPY && peersMode[peer] != SPY)
-                  LogReceivingTx(parsedInv, peer);
 
                 if (std::find(knownTxHashes.begin(), knownTxHashes.end(), parsedInv) != knownTxHashes.end()) {
                     // loop handling
