@@ -301,14 +301,14 @@ main (int argc, char *argv[])
     disp[7] = offsetof(nodeStatistics, firstSpySuccess);
     disp[8] = offsetof(nodeStatistics, onTheFlyCollisions);
     disp[9] = offsetof(nodeStatistics, txReceived);
-    disp[9] = offsetof(nodeStatistics, txAnnounced);
-    disp[10] = offsetof(nodeStatistics, systemId);
-    disp[11] = offsetof(nodeStatistics, ignoredFilters);
-    disp[12] = offsetof(nodeStatistics, reconcils);
-    disp[13] = offsetof(nodeStatistics, mode);
+    disp[10] = offsetof(nodeStatistics, txAnnounced);
+    disp[11] = offsetof(nodeStatistics, systemId);
+    disp[12] = offsetof(nodeStatistics, ignoredFilters);
+    disp[13] = offsetof(nodeStatistics, reconcils);
+    disp[14] = offsetof(nodeStatistics, mode);
 
 
-    MPI_Type_create_struct (14, blocklen, disp, dtypes, &mpi_nodeStatisticsType);
+    MPI_Type_create_struct (15, blocklen, disp, dtypes, &mpi_nodeStatisticsType);
     MPI_Type_commit (&mpi_nodeStatisticsType);
 
     if (systemId != 0 && systemCount > 1)
