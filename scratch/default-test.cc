@@ -707,13 +707,13 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   // std::vector<double> fullRelayTimes;
 
   const int GRANULARITY = 20;
-  std::vector<std::vector<double>> percentRelayTimes(GRANULARITY);
+  std::vector<std::vector<long long>> percentRelayTimes(GRANULARITY);
 
 
   for (std::map<int, std::vector<long long>>::iterator txTimes=allTxRelayTimes.begin();
     txTimes!=allTxRelayTimes.end(); ++txTimes)
   {
-    std::vector<double> relayTimes = txTimes->second;
+    std::vector<long long> relayTimes = txTimes->second;
     std::sort(relayTimes.begin(), relayTimes.end());
     int i = 0;
     while (i < GRANULARITY)
