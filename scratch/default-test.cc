@@ -710,7 +710,7 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   std::vector<std::vector<double>> percentRelayTimes(GRANULARITY);
 
 
-  for (std::map<int, std::vector<double>>::iterator txTimes=allTxRelayTimes.begin();
+  for (std::map<int, std::vector<long long>>::iterator txTimes=allTxRelayTimes.begin();
     txTimes!=allTxRelayTimes.end(); ++txTimes)
   {
     std::vector<double> relayTimes = txTimes->second;
@@ -777,7 +777,7 @@ void CollectTxData(nodeStatistics *stats, int totalNoNodes,
 #ifdef MPI_TEST
   int            blocklen[4] = {1, 1, 1, 1};
   MPI_Aint       disp[4];
-  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT};
+  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_LONG_LONG_INT, MPI_INT};
   MPI_Datatype   mpi_txRecvTime;
 
   disp[0] = offsetof(txRecvTime, nodeId);
@@ -833,7 +833,7 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
 #ifdef MPI_TEST
   int            blocklen[4] = {1, 1, 1, 1};
   MPI_Aint       disp[4];
-  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_DOUBLE, MPI_INT};
+  MPI_Datatype   dtypes[4] = {MPI_INT, MPI_INT, MPI_LONG_LONG_INT, MPI_INT};
   MPI_Datatype   mpi_txAnnTime;
 
   disp[0] = offsetof(txAnnTime, nodeId);

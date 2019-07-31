@@ -74,14 +74,14 @@ enum ModeType
 typedef struct {
   int nodeId;
   int txHash;
-  double txTime;
+  long long txTime;
   int hopNumber;
 } txRecvTime;
 
 typedef struct {
   int nodeId;
   int txHash;
-  double txTime;
+  long long txTime;
   int heardFrom;
 } txAnnTime;
 
