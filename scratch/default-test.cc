@@ -875,7 +875,6 @@ void CollectAnnData(nodeStatistics *stats, int totalNoNodes,
         count++;
         continue;
       }
-      std::cout << "Announces spied: " << stats[count].txAnnounced;
       for (int j = 0; j < stats[count].txAnnounced; j++)
        {
           MPI_Recv(&ann, 1, mpi_txAnnTime, MPI_ANY_SOURCE, 8899, MPI_COMM_WORLD, &status);

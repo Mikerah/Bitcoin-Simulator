@@ -699,8 +699,10 @@ BitcoinNode::HandleRead (Ptr<Socket> socket)
                 int   parsedInv = d["inv"][j].GetInt();
                 int   hopNumber = d["hop"].GetInt();
                 bool  isRecon = d["recon"].GetBool();
-                if (m_mode == SPY && peersMode[peer] != SPY)
+                if (m_mode == SPY && peersMode[peer] != SPY) {
                   LogReceivingTx(parsedInv, peer);
+                  return;
+                }
 
                 if (std::find(peersKnowTx[parsedInv].begin(), peersKnowTx[parsedInv].end(), peer) != peersKnowTx[parsedInv].end())
                   m_nodeStats->onTheFlyCollisions++;
