@@ -38,7 +38,7 @@ using namespace ns3;
 double get_wall_time();
 int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr);
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate);
-void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int, std::vector<double>> allTxRelayTimes);
+void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int, std::vector<long long>> allTxRelayTimes);
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
@@ -413,13 +413,13 @@ int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr)
   return -1; //if not found
 }
 
-void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int, std::vector<double>> allTxRelayTimes) {
+void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int, std::vector<long long>> allTxRelayTimes) {
   std::cout << "Missing transactions:" << std::endl;
 
 
   int allTxsCount = allTxRelayTimes.size();
   std::set<int> allTxIds;
-  for(std::map<int, std::vector<double>>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
+  for(std::map<int, std::vector<long long>>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
       int txId = it->first;
       allTxIds.insert(txId);
   }
