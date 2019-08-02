@@ -447,7 +447,7 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
 
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate)
 {
-  std::map<int, std::vector<double>> allTxRelayTimes;
+  std::map<int, std::vector<long long>> allTxRelayTimes;
 
   int ignoredFilters = 0;
 
