@@ -38,7 +38,7 @@ using namespace ns3;
 double get_wall_time();
 int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr);
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate);
-void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int, std::vector<long long>> allTxRelayTimes);
+void FindMissingTransacions(nodeStatistics *stats, int totalNodes, std::map<int, std::vector<int64_t>> allTxRelayTimes);
 void PrintBitcoinRegionStats (uint32_t *bitcoinNodesRegions, uint32_t totalNodes);
 void CollectTxData(nodeStatistics *stats, int totalNoNodes,
    int systemId, int systemCount, int nodesInSystemId0, BitcoinTopologyHelper bitcoinTopologyHelper);
@@ -413,13 +413,13 @@ int GetNodeIdByIpv4 (Ipv4InterfaceContainer container, Ipv4Address addr)
   return -1; //if not found
 }
 
-void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int, std::vector<long long>> allTxRelayTimes) {
+void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int, std::vector<int64_t>> allTxRelayTimes) {
   std::cout << "Missing transactions:" << std::endl;
 
 
   int allTxsCount = allTxRelayTimes.size();
   std::set<int> allTxIds;
-  for(std::map<int, std::vector<long long>>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
+  for(std::map<int, std::vector<int64_t>>::const_iterator it = allTxRelayTimes.begin(); it != allTxRelayTimes.end(); it++){
       int txId = it->first;
       allTxIds.insert(txId);
   }
@@ -447,7 +447,7 @@ void FindMissingTransacions (nodeStatistics *stats, int totalNodes, std::map<int
 
 void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPNodes, int blackHoles, int bisectionRate)
 {
-  std::map<int, std::vector<long long>> allTxRelayTimes;
+  std::map<int, std::vector<int64_t>> allTxRelayTimes;
 
   int ignoredFilters = 0;
 
@@ -707,13 +707,13 @@ void PrintStatsForEachNode (nodeStatistics *stats, int totalNodes, int publicIPN
   // std::vector<double> fullRelayTimes;
 
   const int GRANULARITY = 20;
-  std::vector<std::vector<long long>> percentRelayTimes(GRANULARITY);
+  std::vector<std::vector<int64_t>> percentRelayTimes(GRANULARITY);
 
 
-  for (std::map<int, std::vector<long long>>::iterator txTimes=allTxRelayTimes.begin();
+  for (std::map<int, std::vector<int64_t>>::iterator txTimes=allTxRelayTimes.begin();
     txTimes!=allTxRelayTimes.end(); ++txTimes)
   {
-    std::vector<long long> relayTimes = txTimes->second;
+    std::vector<int64_t> relayTimes = txTimes->second;
     std::sort(relayTimes.begin(), relayTimes.end());
     int i = 0;
     while (i < GRANULARITY)
