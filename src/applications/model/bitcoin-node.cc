@@ -960,7 +960,7 @@ void BitcoinNode::LogReceivingTx(int txId, Ipv4Address from) {
   txAnnTime txTime;
   txTime.nodeId = GetNode()->GetId();
   txTime.txHash = txId;
-  txTime.txTime = Simulator::Now().GetNanoSeconds();
+  txTime.txTime = Simulator::Now().GetMicroSeconds();
   txTime.heardFrom = peersId[from];
   m_nodeStats->txAnnouncedTimes.push_back(txTime);
   m_nodeStats->txAnnounced++;
