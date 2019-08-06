@@ -37,6 +37,7 @@ int EstimateDifference(int setSize1, int setSize2, double multiplier) {
 }
 
 int BitcoinNode::PoissonNextSend(int averageIntervalSeconds) {
+    return 0;
     const uint64_t range_from  = 0;
     const uint64_t range_to    = 1ULL << 48;
     std::random_device                  rand_dev;
@@ -47,6 +48,7 @@ int BitcoinNode::PoissonNextSend(int averageIntervalSeconds) {
 }
 
 int BitcoinNode::PoissonNextSendIncoming(int averageIntervalSeconds) {
+  return 0;
   auto now = Simulator::Now().GetSeconds();
   if (lastInvScheduled < now) {
     auto newDelay = PoissonNextSend(averageIntervalSeconds);
@@ -315,7 +317,7 @@ BitcoinNode::StartApplication ()    // Called at time specified by Start
 
 
 void BitcoinNode::LogTime() {
-  if (int(Simulator::Now().GetSeconds()) % 10 == 0)
+  if (int(Simulator::Now().GetSeconds()) % 100 == 0)
     std::cout << Simulator::Now().GetSeconds() << std::endl;
   if (m_timeToRun < Simulator::Now().GetSeconds()) {
     return;
@@ -851,7 +853,7 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
   {
     if (i != from)
     {
-      double delay = 0.00001;
+      double delay = 0;//0.00001;
       if (std::find(m_outPeers.begin(), m_outPeers.end(), i) == m_outPeers.end())
         delay += PoissonNextSendIncoming(m_protocolSettings.invIntervalSeconds);
       else
@@ -882,7 +884,7 @@ BitcoinNode::AdvertiseNewTransactionInv(Ipv4Address from, const int transactionH
         else
           continue;
       }
-      double delay = 0.00001;
+      double delay = 0;//0.00001;
       delay += PoissonNextSend(m_protocolSettings.invIntervalSeconds);
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, preferredPeer, transactionHash, firstTimeHops[transactionHash] + 1, false);
       peersToRelayTo--;
@@ -960,7 +962,7 @@ void BitcoinNode::LogReceivingTx(int txId, Ipv4Address from) {
   txAnnTime txTime;
   txTime.nodeId = GetNode()->GetId();
   txTime.txHash = txId;
-  txTime.txTime = Simulator::Now().GetMicroSeconds();
+  txTime.txTime = Simulator::Now().GetMilliSeconds();
   txTime.heardFrom = peersId[from];
   m_nodeStats->txAnnouncedTimes.push_back(txTime);
   m_nodeStats->txAnnounced++;
