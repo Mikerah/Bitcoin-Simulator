@@ -854,8 +854,8 @@ BitcoinNode::AdvertiseNewTransactionInvStandard(Ipv4Address from, const int tran
     if (i != from)
     {
       double delay = 0;//0.00001;
-      int processing_time = GetNode()->GetId() % 10; // random value based on node id;
-      delay += processing_time * 0.001; // 0-10 millis
+      int processing_time = GetNode()->GetId() % 50; // random value based on node id;
+      delay += processing_time * 0.001; // 0-50 millis
       Simulator::Schedule (Seconds(delay), &BitcoinNode::SendInvToNode, this, i, transactionHash, firstTimeHops[transactionHash] + 1, false);
     }
   }
